@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include <QtWidgets/QMainWindow>
-#include <thread>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTimer>
@@ -17,7 +16,16 @@ public:
 	QuestClient(QWidget* parent = Q_NULLPTR);
 
 	void sendCommand(QString) const;
+	void sendSetCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
+	void sendSetUserAttributeCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
+	QString sendInquireUserAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
+
+protected:
+	void appendClientMessage(QString) const;
+	void appendSystemMessage(QString) const;
+	void appendQuestMessage(QString) const;
 private:
+	QString currentReceivedMessage{};
 	Ui::QuestClientClass ui;
 	using Socket = int;
 	DenebTcpSocket questSocket;

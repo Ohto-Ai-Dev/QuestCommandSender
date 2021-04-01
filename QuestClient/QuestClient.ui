@@ -6,79 +6,242 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>786</width>
-    <height>570</height>
+    <width>980</width>
+    <height>818</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>QuestClient</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_6">
+   <layout class="QVBoxLayout" name="verticalLayout_9">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_22">
-      <item>
-       <widget class="QLineEdit" name="questPath">
-        <property name="text">
-         <string>D:\deneb\quest\quest.bat</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="chooseQuestPath">
-        <property name="text">
-         <string>选择Quest</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="runQuest">
-        <property name="text">
-         <string>本地启动并连接</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="connectWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>55</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_22">
+         <item>
+          <widget class="QLineEdit" name="questPath">
+           <property name="text">
+            <string>D:\deneb\quest\quest.bat</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="chooseQuestPath">
+           <property name="text">
+            <string>选择Quest</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="runQuest">
+           <property name="text">
+            <string>本地启动并连接</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QLineEdit" name="hostame">
+           <property name="text">
+            <string>localhost</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="port">
+           <property name="minimumSize">
+            <size>
+             <width>50</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>50</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="inputMask">
+            <string>Ddddd</string>
+           </property>
+           <property name="text">
+            <string>9988</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="connectCheck">
+           <property name="text">
+            <string>连接</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="closeQuest">
+           <property name="text">
+            <string>关闭Quest</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLineEdit" name="hostame">
-        <property name="text">
-         <string>localhost</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="port">
-        <property name="minimumSize">
-         <size>
-          <width>50</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="inputMask">
-         <string>Ddddd</string>
-        </property>
-        <property name="text">
-         <string>9988</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="connectCheck">
-        <property name="text">
-         <string>连接</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+     <widget class="QWidget" name="modelControllWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>0</width>
+        <height>61</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_24">
+         <item>
+          <widget class="QLabel" name="label_17">
+           <property name="text">
+            <string>Model</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="modelPath">
+           <property name="text">
+            <string>D:\deneb\</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="chooseModel">
+           <property name="text">
+            <string>选择</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="readModel">
+           <property name="text">
+            <string>加载</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="transferToMenu">
+           <property name="toolTip">
+            <string>暂停控制并启用Quest菜单，可在关闭Quest窗口后返回控制.</string>
+           </property>
+           <property name="text">
+            <string>交换控制</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_19">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>间隔</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="simInterval">
+           <property name="text">
+            <string>0.5</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_20">
+           <property name="text">
+            <string>时间</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="simtime">
+           <property name="text">
+            <string>50</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="startSim">
+           <property name="text">
+            <string>开始</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="resetSim">
+           <property name="text">
+            <string>重置</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="continueSim">
+           <property name="text">
+            <string>继续</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QWidget" name="commandSendWidget" native="true">
@@ -116,92 +279,62 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_24">
+     <layout class="QHBoxLayout" name="horizontalLayout_25">
       <item>
-       <widget class="QLabel" name="label_17">
+       <widget class="QComboBox" name="quickCommandMode">
+        <item>
+         <property name="text">
+          <string>设置</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>查询</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="elementMode">
+        <item>
+         <property name="text">
+          <string>类</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>实例</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="element"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_23">
         <property name="text">
-         <string>Model</string>
+         <string>属性</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QLineEdit" name="modelPath">
+       <widget class="QLineEdit" name="attrib"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_24">
         <property name="text">
-         <string>D:\deneb\</string>
+         <string>值</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="chooseModel">
-        <property name="text">
-         <string>选择</string>
-        </property>
-       </widget>
+       <widget class="QLineEdit" name="value"/>
       </item>
       <item>
-       <widget class="QPushButton" name="readModel">
+       <widget class="QPushButton" name="quickCommand">
         <property name="text">
-         <string>加载</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="transferToMenu">
-        <property name="text">
-         <string>放弃控制权</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_19">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>间隔</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="simInterval">
-        <property name="text">
-         <string>0.5</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_20">
-        <property name="text">
-         <string>时间</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="simtime">
-        <property name="text">
-         <string>50</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="startSim">
-        <property name="text">
-         <string>开始</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="resetSim">
-        <property name="text">
-         <string>重置</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="continueSim">
-        <property name="text">
-         <string>继续</string>
+         <string>执行</string>
         </property>
        </widget>
       </item>
@@ -209,14 +342,14 @@
     </item>
    </layout>
   </widget>
-  <widget class="QDockWidget" name="dockWidget_2">
+  <widget class="QDockWidget" name="argvWindow">
    <property name="windowTitle">
     <string>参数修改</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>2</number>
    </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
+   <widget class="QWidget" name="argvWidget">
     <layout class="QVBoxLayout" name="verticalLayout_8">
      <item>
       <widget class="QWidget" name="agvSpeedWidget" native="true">
@@ -422,7 +555,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="loadTime"/>
+           <widget class="QLineEdit" name="loadTime">
+            <property name="text">
+             <string>90</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -436,7 +573,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="loadDLTime"/>
+           <widget class="QLineEdit" name="unloadDLTime">
+            <property name="text">
+             <string>60</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -450,7 +591,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="unloadTime"/>
+           <widget class="QLineEdit" name="unloadTime">
+            <property name="text">
+             <string>90</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -497,7 +642,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelH2"/>
+             <widget class="QLineEdit" name="levelH2">
+              <property name="text">
+               <string>60</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -511,7 +660,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelL3"/>
+             <widget class="QLineEdit" name="levelL3">
+              <property name="text">
+               <string>30</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -525,7 +678,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelL2"/>
+             <widget class="QLineEdit" name="levelL2">
+              <property name="text">
+               <string>30</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -539,7 +696,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelH1"/>
+             <widget class="QLineEdit" name="levelH1">
+              <property name="text">
+               <string>60</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -553,7 +714,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelL1"/>
+             <widget class="QLineEdit" name="levelL1">
+              <property name="text">
+               <string>30</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -567,7 +732,11 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="levelH3"/>
+             <widget class="QLineEdit" name="levelH3">
+              <property name="text">
+               <string>60</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -608,7 +777,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="levelH1_2">
+           <widget class="QLineEdit" name="ljdError">
             <property name="maximumSize">
              <size>
               <width>20</width>
@@ -635,7 +804,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="levelH2_2">
+           <widget class="QLineEdit" name="luError">
             <property name="maximumSize">
              <size>
               <width>20</width>
@@ -674,6 +843,66 @@
         </size>
        </property>
       </spacer>
+     </item>
+    </layout>
+   </widget>
+  </widget>
+  <widget class="QDockWidget" name="dockWidget">
+   <property name="windowTitle">
+    <string>报表</string>
+   </property>
+   <attribute name="dockWidgetArea">
+    <number>8</number>
+   </attribute>
+   <widget class="QWidget" name="dockWidgetContents">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <item row="0" column="0">
+      <widget class="QWidget" name="reportWidget" native="true">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <property name="leftMargin">
+         <number>0</number>
+        </property>
+        <property name="topMargin">
+         <number>0</number>
+        </property>
+        <property name="rightMargin">
+         <number>0</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="updateReport">
+          <property name="text">
+           <string>更新报表</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="exportReport">
+          <property name="text">
+           <string>导出报表</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>797</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QTextBrowser" name="reportBrowser"/>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </widget>
