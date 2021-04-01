@@ -1,6 +1,6 @@
 ﻿#include "DenebTcpSocket.h"
-#include <thread>
 #include <QTimer>
+#include <QEventLoop>
 
 extern "C"
 {
@@ -14,58 +14,62 @@ extern "C"
 
 DenebTcpSocket::DenebTcpSocket(QObject* parent)
 	: QObject(parent)
-	, m_receiveTimer{ new QTimer{this} }
+	, m_receiveTimer(new QTimer{ this })
 {
 	static bool globalInitNtWin = true;
-	if(globalInitNtWin)
+	if (globalInitNtWin)
 	{
 		nt_winsock_init();
 		globalInitNtWin = false;
 	}
-
-	connect(m_receiveTimer, &QTimer::timeout, [=]
-		{
-			auto code = net_test_socket(m_socket);
-			if (code < 0)
-				disconnected();
-			else if (code > 0)
-				emit received();
-		});
-
 	m_receiveTimer->setInterval(50);
+	connect(m_receiveTimer, &QTimer::timeout, this, [=]
+		{
+			const auto code = net_test_socket(m_socket);
+			if (code < 0)
+				disconnectToHost();
+			else if (code > 0 && !hasMessage)
+			{
+				hasMessage = true;
+				emit received();				
+			}
+		}, Qt::QueuedConnection);
 }
 
 void DenebTcpSocket::connectToHost(QString hostname, int port)
 {
-	std::thread{ [=]
+	if (m_connected)
+		disconnectToHost();
+	const auto connectCode = net_init_socket_client(hostname.toLatin1(), port, &m_socket);
+	emit connectFinished(connectCode);
+	if (connectCode == 0)
 	{
-		if (m_connected)
-			disconnectToHost();
-		const auto connectCode = net_init_socket_client(hostname.toLatin1(), port, &m_socket);
-		emit connectFinished(connectCode);
-		if (!connectCode)
-		{
-			m_connected = true;
-			emit connected();
+		m_connected = true;
+		emit connected();
 
-			m_receiveTimer->start();
-		}
-	} }.detach();
+		m_receiveTimer->start(50);
+	}
+	else
+	{
+		m_connected = false;
+		emit connectFailed(connectCode);
+	}
 }
 
 void DenebTcpSocket::disconnectToHost()
 {
-	std::thread{ [=]
+	if (!m_connected)
 	{
-		if (!m_connected)
-		{
-			m_connected = false;
-			net_close_socket(m_socket);
-			emit disconnected();
+		m_connected = false;
+		emit disconnected(net_close_socket(m_socket));
 
-			m_receiveTimer->stop();
-		}
-	} }.detach();
+	}
+	m_receiveTimer->stop();
+}
+
+bool DenebTcpSocket::isConnected() const
+{
+	return m_connected;
 }
 
 bool DenebTcpSocket::test() const
@@ -73,16 +77,27 @@ bool DenebTcpSocket::test() const
 	return net_test_socket(m_socket) > 0;
 }
 
-bool DenebTcpSocket::send(QByteArray data) const
+bool DenebTcpSocket::write(QByteArray data) const
 {
 	return net_writesocket(m_socket, data) == 0;
 }
 
-QByteArray DenebTcpSocket::recv() const
+QByteArray DenebTcpSocket::read() const
 {
 	char buff[4096] = { 0 };
 	net_readsocket(m_socket, buff);
+	hasMessage = false;
 	return buff;
+}
+
+bool DenebTcpSocket::waitReceived(int msec) const
+{
+	bool received = true;
+	auto eventLoop = new QEventLoop(const_cast<DenebTcpSocket*>(this));
+	QTimer::singleShot(msec, [eventLoop, &received] {received = false; eventLoop->quit(); });
+	connect(this, &DenebTcpSocket::received, eventLoop, &QEventLoop::quit);
+	eventLoop->exec();
+	return received;
 }
 
 QString DenebTcpSocket::hostname() const
