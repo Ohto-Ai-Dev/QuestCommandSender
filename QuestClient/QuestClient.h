@@ -5,6 +5,8 @@
 #include <QMessageBox>
 #include <QTimer>
 #include <QProcess>
+#include <QMenu>
+#include <QDateTime>
 #include "DenebTcpSocket.h"
 #include "ui_QuestClient.h"
 

@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
-    <height>818</height>
+    <width>981</width>
+    <height>782</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>QuestClient</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_9">
+   <layout class="QVBoxLayout" name="verticalLayout_6">
     <item>
      <widget class="QWidget" name="connectWidget" native="true">
       <property name="minimumSize">
@@ -132,19 +132,95 @@
         <height>61</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_6">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QLabel" name="label_30">
+           <property name="text">
+            <string>方案</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="solution1Choice">
+           <property name="text">
+            <string>方案1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2" colspan="3">
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>348</width>
+             <height>18</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="0" rowspan="2">
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="1" column="1" colspan="2">
+          <widget class="QRadioButton" name="littleChoice">
+           <property name="text">
+            <string>方案2-小抓斗方案</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3">
+          <widget class="QRadioButton" name="bigChoice">
+           <property name="text">
+            <string>方案2-大抓斗方案</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="4">
+          <widget class="QRadioButton" name="bigChoiceDump">
+           <property name="text">
+            <string>方案2-大抓斗高峰期方案</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QRadioButton" name="customChoice">
+           <property name="text">
+            <string>自定义</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" colspan="3">
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>368</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_24">
          <item>
@@ -192,7 +268,7 @@
          <item>
           <widget class="QLabel" name="label">
            <property name="text">
-            <string>间隔</string>
+            <string>速度</string>
            </property>
           </widget>
          </item>
@@ -204,16 +280,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_20">
+          <widget class="QCheckBox" name="animationMode">
            <property name="text">
-            <string>时间</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="simtime">
-           <property name="text">
-            <string>50</string>
+            <string>动画</string>
            </property>
           </widget>
          </item>
@@ -390,6 +459,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_15">
+              <property name="text">
+               <string>mm/s</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item row="0" column="1">
@@ -405,6 +481,13 @@
              <widget class="QLineEdit" name="hoistSpeed1">
               <property name="text">
                <string>600</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>mm/s</string>
               </property>
              </widget>
             </item>
@@ -426,6 +509,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_18">
+              <property name="text">
+               <string>mm/s</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item row="1" column="1">
@@ -441,6 +531,13 @@
              <widget class="QLineEdit" name="hoistSpeed2">
               <property name="text">
                <string>600</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_27">
+              <property name="text">
+               <string>mm/s</string>
               </property>
              </widget>
             </item>
@@ -462,6 +559,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_22">
+              <property name="text">
+               <string>mm/s</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item row="2" column="1">
@@ -477,6 +581,13 @@
              <widget class="QLineEdit" name="hoistSpeed3">
               <property name="text">
                <string>600</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_28">
+              <property name="text">
+               <string>mm/s</string>
               </property>
              </widget>
             </item>
@@ -498,6 +609,13 @@
               </property>
              </widget>
             </item>
+            <item>
+             <widget class="QLabel" name="label_25">
+              <property name="text">
+               <string>mm/s</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </item>
           <item row="3" column="1">
@@ -513,6 +631,13 @@
              <widget class="QLineEdit" name="hoistSpeed4">
               <property name="text">
                <string>600</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>mm/s</string>
               </property>
              </widget>
             </item>
@@ -637,7 +762,7 @@
             <item>
              <widget class="QLabel" name="label_11">
               <property name="text">
-               <string>最高料位2</string>
+               <string>2号料位 最高</string>
               </property>
              </widget>
             </item>
@@ -655,7 +780,7 @@
             <item>
              <widget class="QLabel" name="label_14">
               <property name="text">
-               <string>最低料位3</string>
+               <string>最低</string>
               </property>
              </widget>
             </item>
@@ -673,7 +798,7 @@
             <item>
              <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>最低料位2</string>
+               <string>最低</string>
               </property>
              </widget>
             </item>
@@ -691,7 +816,7 @@
             <item>
              <widget class="QLabel" name="label_9">
               <property name="text">
-               <string>最高料位1</string>
+               <string>1号料位 最高</string>
               </property>
              </widget>
             </item>
@@ -709,7 +834,7 @@
             <item>
              <widget class="QLabel" name="label_10">
               <property name="text">
-               <string>最低料位1</string>
+               <string>最低</string>
               </property>
              </widget>
             </item>
@@ -727,7 +852,7 @@
             <item>
              <widget class="QLabel" name="label_13">
               <property name="text">
-               <string>最高料位3</string>
+               <string>3号料位 最高</string>
               </property>
              </widget>
             </item>
@@ -744,85 +869,6 @@
         </item>
         <item>
          <widget class="QPushButton" name="sendLevel">
-          <property name="text">
-           <string>应用</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-     </item>
-     <item>
-      <widget class="QWidget" name="errorWidget" native="true">
-       <layout class="QVBoxLayout" name="verticalLayout_4">
-        <property name="leftMargin">
-         <number>0</number>
-        </property>
-        <property name="topMargin">
-         <number>0</number>
-        </property>
-        <property name="rightMargin">
-         <number>0</number>
-        </property>
-        <property name="bottomMargin">
-         <number>0</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_20">
-          <item>
-           <widget class="QLabel" name="label_18">
-            <property name="text">
-             <string>垃圾吊故障</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="ljdError">
-            <property name="maximumSize">
-             <size>
-              <width>20</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="inputMask">
-             <string>#</string>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_17">
-          <item>
-           <widget class="QLabel" name="label_15">
-            <property name="text">
-             <string>炉子检修</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="luError">
-            <property name="maximumSize">
-             <size>
-              <width>20</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="inputMask">
-             <string>#</string>
-            </property>
-            <property name="text">
-             <string>0</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <widget class="QPushButton" name="sendError">
           <property name="text">
            <string>应用</string>
           </property>
@@ -899,7 +945,11 @@
          </spacer>
         </item>
         <item row="1" column="0" colspan="3">
-         <widget class="QTextBrowser" name="reportBrowser"/>
+         <widget class="QTextBrowser" name="reportBrowser">
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>

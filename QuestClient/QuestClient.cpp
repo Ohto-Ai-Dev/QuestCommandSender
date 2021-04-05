@@ -30,10 +30,13 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.closeQuest, &QPushButton::clicked, [=]
 		{
-			if (questSocket.write("EXIT"))
+			if (QMessageBox::warning(this, "确认", "确认关闭Quest？", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
 			{
-				questSocket.disconnectToHost();
-			}		
+				if (questSocket.write("EXIT"))
+				{
+					questSocket.disconnectToHost();
+				}
+			}
 		});
 	
 	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
@@ -73,10 +76,11 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.startSim, &QPushButton::clicked, [=]
 		{
+			sendCommand(QString("SET ANIMATION MODE %1").arg(ui.animationMode->isChecked() ? "ON" : "OFF"));
 			sendCommand(QString("SET SIMULATION TIME INTERVAL TO %1").arg(ui.simInterval->text()));
 			sendCommand(QString("RUN %1").arg(ui.simtime->text()));
 		});
-
+	
 	connect(ui.resetSim, &QPushButton::clicked, [=]
 		{
 			sendCommand("RESET RUN");
@@ -84,11 +88,11 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.continueSim, &QPushButton::clicked, [=]
 		{
+			sendCommand(QString("SET ANIMATION MODE %1").arg(ui.animationMode->isChecked() ? "ON" : "OFF"));
 			sendCommand(QString("SET SIMULATION TIME INTERVAL TO %1").arg(ui.simInterval->text()));
 			sendCommand(QString("CONTINUE FOR %1").arg(ui.simtime->text()));
 		});
-
-
+		
 	connect(ui.chooseModel, &QPushButton::clicked, [=]
 		{
 			const auto filePath = QFileDialog::getOpenFileName(this, "Choose Model", ui.modelPath->text(), "Model Files(*.mdl);;All Files(*.*)");
@@ -100,7 +104,11 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.readModel, &QPushButton::clicked, [=]
 		{
+			sendCommand("CLEAR ALL");
 			sendCommand(QString("READ MODEL '%1'").arg(ui.modelPath->text()));
+
+			if (ui.bigChoice->isChecked()|| ui.bigChoiceDump->isChecked())
+				sendSetUserAttributeCommand("Source_time", "modetag", QString::number(ui.bigChoiceDump->isChecked()));
 		});
 
 	connect(ui.transferToMenu, &QPushButton::clicked, [=]
@@ -110,8 +118,112 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.updateReport, &QPushButton::clicked, [=]
 		{
-			auto route_flag = sendInquireUserAttributeCommand("Source_TL1", "route_flag", true);
-			ui.reportBrowser->append(QString("Source_TL1_1.route_flag = %1").arg(route_flag));
+			auto maxGyNum = sendInquireUserAttributeCommand("Source_time", "max_gy_num", true).toDouble();
+			auto maxShNum = sendInquireUserAttributeCommand("Source_time", "max_sh_num", true).toDouble();
+			auto liaoCangTotal = sendInquireUserAttributeCommand("Source_time", "liaocangtotal", true).toDouble();
+
+
+			auto gy_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "gy_xieliao", true).toDouble();
+			auto sh_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "sh_xieliao", true).toDouble();
+			auto dgy_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "dgy_xieliao", true).toDouble();
+			auto touliao1_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao1", true).toDouble();
+			auto touliao2_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao2", true).toDouble();
+			auto touliao3_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao3", true).toDouble();
+
+			auto gy_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "gy_xieliao", true).toDouble();
+			auto sh_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "sh_xieliao", true).toDouble();
+			auto dgy_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "dgy_xieliao", true).toDouble();
+			auto touliao1_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao1", true).toDouble();
+			auto touliao2_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao2", true).toDouble();
+			auto touliao3_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao3", true).toDouble();
+
+			auto gy_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "gy_xieliao", true).toDouble();
+			auto sh_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "sh_xieliao", true).toDouble();
+			auto dgy_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "dgy_xieliao", true).toDouble();
+			auto touliao1_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao1", true).toDouble();
+			auto touliao2_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao2", true).toDouble();
+			auto touliao3_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao3", true).toDouble();
+
+			auto simTime = sendInquireUserAttributeCommand("Source_time", "u_sim_time", true).toDouble();
+			auto firstSimTime = sendInquireUserAttributeCommand("Source_time", "u_first_use_time", true).toDouble();
+			if (simTime == 0.0)
+				simTime = 0.000001;
+			double agvBusyProc[4], agvBusyTime[4], agvBusyWaitTime[4], agvLoadTime[4], agvUnloadTime[4], agvEmptyTravelTime[4], agvFirstUseTime[4];
+			double agvUsePercent[4], agvUserPercentFixed[4];
+
+			for (int i = 0; i < 4; ++i)
+			{
+				agvBusyProc[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_proc_time", true).toDouble();
+				agvBusyTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_time", true).toDouble();
+				agvBusyWaitTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_wait_time", true).toDouble();
+				agvLoadTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_load_time", true).toDouble();
+				agvUnloadTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_unload_time", true).toDouble();
+				agvEmptyTravelTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_empty_travel_time", true).toDouble();
+				agvFirstUseTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_first_use_time", true).toDouble();
+				agvUsePercent[i] = (agvLoadTime[i] + agvUnloadTime[i] + agvEmptyTravelTime[i]) * 3600 / simTime;
+
+				if (simTime > 86400)
+					agvUserPercentFixed[i] = (agvLoadTime[i] + agvUnloadTime[i] + agvEmptyTravelTime[i] - agvFirstUseTime[i]) * 3600 / (simTime - firstSimTime);
+				else
+					agvUserPercentFixed[i] = 0;
+			}
+
+			if (ui.bigChoice->isChecked() || ui.bigChoiceDump->isChecked())
+			{
+				maxGyNum *= 6;
+				maxShNum *= 6;
+			}
+			else
+			{
+				maxGyNum *= 3.5;
+				maxShNum *= 3.5;
+			}
+
+			ui.reportBrowser->append(QString(R"([%0]Report
+料仓统计 %1t
+送往左侧工业仓垃圾 %2t
+送往左侧生活仓垃圾 %3t
+
+行车	工业卸料	生活卸料 大工业仓卸料	投料1	投料2	投料3	利用率
+AGV2	%4	%5	%6	%7	%8	%9	%10
+AGV3	%11	%12	%13	%14	%15	%16	%17
+AGV4	%18	%19	%20	%21	%22	%23	%24
+
+投料口	数量
+料口1	%25t
+料口2	%26t
+料口3	%27t
+
+)")
+.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+.arg(liaoCangTotal).arg(maxGyNum).arg(maxShNum)
+.arg(gy_xieliao2).arg(sh_xieliao2).arg(dgy_xieliao2).arg(touliao1_2).arg(touliao2_2).arg(touliao3_2).arg(agvUserPercentFixed[1])
+.arg(gy_xieliao3).arg(sh_xieliao3).arg(dgy_xieliao3).arg(touliao1_3).arg(touliao2_3).arg(touliao3_3).arg(agvUserPercentFixed[2])
+.arg(gy_xieliao4).arg(sh_xieliao4).arg(dgy_xieliao4).arg(touliao1_4).arg(touliao2_4).arg(touliao3_4).arg(agvUserPercentFixed[3])
+.arg((touliao1_2 + touliao1_3 + touliao1_4) * 9)
+.arg((touliao2_2 + touliao2_3 + touliao2_4) * 9)
+.arg((touliao3_2 + touliao3_3 + touliao3_4) * 9)
+);
+		});
+
+	connect(ui.reportBrowser, &QTextBrowser::customContextMenuRequested, [=]
+		{
+			QMenu menu{ this };
+			menu.addAction("全选", ui.reportBrowser, &QTextBrowser::selectAll);
+			menu.addAction("复制", ui.reportBrowser, &QTextBrowser::copy);
+			menu.addAction("清除", ui.reportBrowser, &QTextBrowser::clear);
+			menu.exec(QCursor::pos());
+		});
+
+	connect(ui.exportReport, &QPushButton::clicked, [=]
+		{
+			QFile exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "文本文件(*.txt)");
+		if(exportFile.exists())
+		{
+			exportFile.open(QFile::WriteOnly);
+			exportFile.write(ui.reportBrowser->toPlainText().toLatin1());
+			exportFile.close();
+		}
 		});
 
 	connect(ui.quickCommand, &QPushButton::clicked, [=]
@@ -169,10 +281,34 @@ QuestClient::QuestClient(QWidget* parent)
 			sendSetUserAttributeCommand("Buffer_TL_3", "lowest", toBlockCount(ui.levelL3->text()));
 		});
 
-	connect(ui.sendError, &QPushButton::clicked, [=]
+	connect(ui.solution1Choice, &QCheckBox::clicked, [=]
 		{
-			sendSetUserAttributeCommand("Source_TL1", "ljfailure", ui.ljdError->text());
-			sendSetUserAttributeCommand("Source_TL1", "lufailure", ui.luError->text());
+			ui.modelPath->setEnabled(false);
+			ui.chooseModel->setEnabled(false);
+			ui.modelPath->setText(R"(D:\deneb\GDWJ1\MODELS\GDWJ.mdl)");
+		});
+	connect(ui.littleChoice, &QCheckBox::clicked, [=]
+		{
+			ui.modelPath->setEnabled(false);
+			ui.chooseModel->setEnabled(false);
+			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane\MODELS\GDWJ.mdl)");
+		});
+	connect(ui.bigChoice, &QCheckBox::clicked, [=]
+		{
+			ui.modelPath->setEnabled(false);
+			ui.chooseModel->setEnabled(false);
+			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl)");
+		});
+	connect(ui.bigChoiceDump, &QCheckBox::clicked, [=]
+		{
+			ui.modelPath->setEnabled(false);
+			ui.chooseModel->setEnabled(false);
+			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl)");
+		});
+	connect(ui.customChoice, &QCheckBox::clicked, [=]
+		{
+			ui.modelPath->setEnabled(true);
+			ui.chooseModel->setEnabled(true);
 		});
 
 	connect(&questSocket, &DenebTcpSocket::received, [=]
