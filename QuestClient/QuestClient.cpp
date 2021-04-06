@@ -1,6 +1,8 @@
 ﻿#pragma execution_character_set("utf-8")
 #include "QuestClient.h"
 #include <windows.h>
+#include <thread>
+#include <QThread>
 
 QuestClient::QuestClient(QWidget* parent)
 	: QMainWindow(parent)
@@ -11,8 +13,7 @@ QuestClient::QuestClient(QWidget* parent)
 	if (QFile configFile{ configPath }; !configFile.exists())
 	{
 		configFile.open(QFile::WriteOnly);
-		configFile.write(R"(
-{
+		configFile.write(R"({
   "application_name": "QuestClient.exe",
   "version": "v1.0",
   "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
@@ -32,6 +33,7 @@ QuestClient::QuestClient(QWidget* parent)
     },
     "plan_sim_time": 345600
   },
+  "wait_quest_time":2500,
   "log_to_file": false,
   "log_to_window": true
 }
@@ -58,9 +60,6 @@ QuestClient::QuestClient(QWidget* parent)
 	}
 
 	QProcess::execute(questPath, { "-s", QString::number(questPort) });
-	QTimer::singleShot(500, [=] {
-		questSocket.connectToHost("localhost", questPort);
-		});
 
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
@@ -165,86 +164,87 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.exportReport, &QPushButton::clicked, [=]
 		{
-			auto exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "Excel 文件(*.xls *.xlsx)");
+			const auto exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "Excel 文件(*.xls *.xlsx)");
 			if (exportFile.isEmpty())
 				return;
-			if (auto excel = new QAxObject{ this }; excel->setControl("Excel.Application")) //连接Excel控件
+			else if (const QFileInfo fileInfo(exportFile); QFile{ fileInfo.path() + "/~$" + fileInfo.fileName() }.exists())
 			{
-				excel->dynamicCall("SetVisible (bool Visible)", "false");//不显示窗体
-				excel->setProperty("DisplayAlerts", false);//不显示任何警告信息。如果为true那么在关闭是会出现类似“文件已修改，是否保存”的提示
-				auto workbooks = excel->querySubObject("WorkBooks");//获取工作簿集合
-				workbooks->dynamicCall("Add");//新建一个工作簿
-				auto workbook = excel->querySubObject("ActiveWorkBook");//获取当前工作簿
-				auto worksheet = workbook->querySubObject("Worksheets(int)", 1);
-				auto table = ui.agvReportTable;
+				QMessageBox::warning(this, "错误", "此文件已被Excel锁定，无法写入，请重试.");
+				return;
+			}
 
-				int colCount = table->columnCount();
-				int rowCount = table->rowCount();
+
+			if (!excel.setControl("excel.Application")) //连接Excel控件
+			{
+				QMessageBox::warning(this, "错误", "未能创建 Excel 对象，请安装 Microsoft Excel。", QMessageBox::Apply);
+				return;
+			}
+			else {
+				excel.dynamicCall("SetVisible (bool Visible)", "false");		// 不显示窗体
+				excel.setProperty("DisplayAlerts", false);					// 不显示任何警告信息。如果为true那么在关闭是会出现类似“文件已修改，是否保存”的提示
+				excel.querySubObject("WorkBooks")->dynamicCall("Add");		// 新建一个工作簿
+				auto workbook = excel.querySubObject("ActiveWorkBook");// 获取当前工作簿
+				auto worksheet = workbook->querySubObject("Worksheets(int)", 1);
+				const auto table = ui.agvReportTable;
+
+				const int columnCount = table->columnCount();
+				const int rowCount = table->rowCount();
 
 				//标题行
 				auto cell = worksheet->querySubObject("Cells(int,int)", 1, 1);
 				cell->dynamicCall("SetValue(const QString&)", "报表统计");
 				cell->querySubObject("Font")->setProperty("Size", 18);
-				//调整行高
+				// 调整行高
 				worksheet->querySubObject("Range(const QString&)", "1:1")->setProperty("RowHeight", 30);
-				//合并标题行
-				auto range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A1:%c1", colCount + 'A'));
+				// 合并标题行
+				auto range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A1:%c1", columnCount + 'A'));
 				range->setProperty("WrapText", true);
 				range->setProperty("MergeCells", true);
-				range->setProperty("HorizontalAlignment", -4108);//xlCenter
-				range->setProperty("VerticalAlignment", -4108);//xlCenter
-				//列标题
-				for (int i = 0; i < colCount; i++)
+				range->setProperty("HorizontalAlignment", -4108);		// xlCenter
+				range->setProperty("VerticalAlignment", -4108);		// xlCenter
+
+				// 列标题
+				for (int i = 0; i < columnCount; i++)
 				{
-					auto col = worksheet->querySubObject("Columns(const QString&)", QString::asprintf("%c:%c", i + 'B', i + 'B'));
-					col->setProperty("ColumnWidth", table->columnWidth(i) / 6);
+					worksheet->querySubObject("Columns(const QString&)", QString::asprintf("%c:%c", i + 'B', i + 'B'))
+						->setProperty("ColumnWidth", table->columnWidth(i) / 6);
 					auto cell = worksheet->querySubObject("Cells(int,int)", 2, i + 2);
 					cell->dynamicCall("SetValue(const QString&)", table->horizontalHeaderItem(i)->text());
 					cell->querySubObject("Font")->setProperty("Bold", true);
-					cell->setProperty("HorizontalAlignment", -4108);//xlCenter
-					cell->setProperty("VerticalAlignment", -4108);//xlCenter
+					cell->setProperty("HorizontalAlignment", -4108);	// xlCenter
+					cell->setProperty("VerticalAlignment", -4108);		// xlCenter
 				}
 
+				// 行标题
 				worksheet->querySubObject("Columns(const QString&)", "A:A")
 					->setProperty("ColumnWidth", table->verticalHeader()->width() / 6);
-				// 行标题
 				for (int i = 0; i < rowCount; i++)
 				{
 					auto cell = worksheet->querySubObject("Cells(int,int)", i + 3, 1);
 					cell->dynamicCall("SetValue(const QString&)", table->verticalHeaderItem(i)->text());
 					cell->querySubObject("Font")->setProperty("Bold", true);
-					cell->setProperty("HorizontalAlignment", -4108);//xlCenter
-					cell->setProperty("VerticalAlignment", -4108);//xlCenter
+					cell->setProperty("HorizontalAlignment", -4108);	// xlCenter
+					cell->setProperty("VerticalAlignment", -4108);		// xlCenter
 				}
-				//数据区
-				for (int i = 0; i < table->rowCount(); i++) {
-					for (int j = 0; j < colCount; j++)
+				// 数据区
+				for (int i = 0; i < rowCount; i++)
+				{
+					for (int j = 0; j < columnCount; j++)
 					{
 						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QString&)", table->item(i, j) ? table->item(i, j)->text() : "");
 					}
 				}
-				//画框线
-				QString lrange;
-				lrange.append("A2:");
-				lrange.append(colCount + 'A');
-				lrange.append(QString::number(table->rowCount() + 2));
-				range = worksheet->querySubObject("Range(const QString&)", lrange);
+				// 画框线
+				range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A2:%c%d", columnCount + 'A', rowCount + 2));
 				range->querySubObject("Borders")->setProperty("LineStyle", QString::number(1));
 				range->querySubObject("Borders")->setProperty("Color", QColor(0, 0, 0));
-				//调整数据区行高
-				QString rowsName;
-				rowsName.append("2:");
-				rowsName.append(QString::number(table->rowCount() + 2));
-				range = worksheet->querySubObject("Range(const QString&)", rowsName);
+				// 调整数据区行高
+				range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("2:%d", rowCount + 2));
 				range->setProperty("RowHeight", 20);
-				workbook->dynamicCall("SaveAs(const QString&)", QDir::toNativeSeparators(exportFile));//保存至fileName
-				workbook->dynamicCall("Close()");//关闭工作簿
-				excel->dynamicCall("Quit()");//关闭excel
-				excel->deleteLater();
-			}
-			else
-			{
-				QMessageBox::warning(NULL, "错误", "未能创建 Excel 对象，请安装 Microsoft Excel。", QMessageBox::Apply);
+				workbook->dynamicCall("SaveAs(const QString&)", QDir::toNativeSeparators(exportFile));	// 保存至fileName
+				workbook->dynamicCall("Close()");															// 关闭工作簿
+				excel.dynamicCall("Quit()");																// 关闭excel
+				QMessageBox::information(this, "", "报表已导出");
 			}
 		});
 
@@ -365,6 +365,11 @@ QuestClient::QuestClient(QWidget* parent)
 				logFile.flush();
 			}
 		});
+
+	QEventLoop eventLoop{ this };
+	QTimer::singleShot(config["wait_quest_time"].get<int>(), &eventLoop, &QEventLoop::quit);
+	eventLoop.exec();
+	questSocket.connectToHost("localhost", questPort);
 }
 
 void QuestClient::sendCommand(QString command) const

@@ -1,4 +1,4 @@
-﻿{
+{
   "application_name": "QuestClient.exe",
   "version": "v1.0",
   "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
@@ -18,6 +18,7 @@
     },
     "plan_sim_time": 345600
   },
+  "wait_quest_time":2500,
   "log_to_file": false,
   "log_to_window": true
 }

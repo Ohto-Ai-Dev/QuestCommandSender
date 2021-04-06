@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QProcess>
 #include <QMenu>
+#include <QEventLoop>
 #include <QDateTime>
 #include <QAxObject>
 #include <json.hpp>
@@ -31,6 +32,7 @@ private:
 	mutable QFile logFile{ "application.log", this };
 	static inline QString questPath = R"(D:\deneb\quest\quest.bat)";
 	static inline int questPort = 9988;
+	QAxObject excel{ this };
 
 	int planSimTime = 86400;
 
