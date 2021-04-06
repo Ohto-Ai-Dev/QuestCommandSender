@@ -24,6 +24,18 @@
        </size>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="0" column="0">
         <widget class="QLabel" name="label_30">
          <property name="text">
@@ -133,6 +145,18 @@
     <item row="0" column="2" rowspan="5">
      <widget class="QWidget" name="reportWidget" native="true">
       <layout class="QGridLayout" name="gridLayout_4">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item row="0" column="2" colspan="4">
         <spacer name="horizontalSpacer">
          <property name="orientation">
@@ -190,17 +214,17 @@
          </row>
          <row>
           <property name="text">
-           <string>#1炉投炉量</string>
+           <string>#1料口投料量</string>
           </property>
          </row>
          <row>
           <property name="text">
-           <string>#2炉投炉量</string>
+           <string>#2料口投料量</string>
           </property>
          </row>
          <row>
           <property name="text">
-           <string>#3炉投炉量</string>
+           <string>#3料口投料量</string>
           </property>
          </row>
          <row>
@@ -480,7 +504,7 @@
        <item row="4" column="0">
         <widget class="QLabel" name="label_32">
          <property name="text">
-          <string>全天投炉量</string>
+          <string>全天料口投料量</string>
          </property>
         </widget>
        </item>
@@ -643,7 +667,7 @@
            <item>
             <widget class="QLabel" name="label_1">
              <property name="text">
-              <string>垃圾吊1</string>
+              <string>#1垃圾吊</string>
              </property>
             </widget>
            </item>
@@ -668,7 +692,7 @@
            <item>
             <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>升降1</string>
+              <string>#1升降</string>
              </property>
             </widget>
            </item>
@@ -693,7 +717,7 @@
            <item>
             <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>垃圾吊2</string>
+              <string>#2垃圾吊</string>
              </property>
             </widget>
            </item>
@@ -718,7 +742,7 @@
            <item>
             <widget class="QLabel" name="label_6">
              <property name="text">
-              <string>升降2</string>
+              <string>#2升降</string>
              </property>
             </widget>
            </item>
@@ -743,7 +767,7 @@
            <item>
             <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>垃圾吊3</string>
+              <string>#3垃圾吊</string>
              </property>
             </widget>
            </item>
@@ -768,7 +792,7 @@
            <item>
             <widget class="QLabel" name="label_7">
              <property name="text">
-              <string>升降3</string>
+              <string>#3升降</string>
              </property>
             </widget>
            </item>
@@ -793,7 +817,7 @@
            <item>
             <widget class="QLabel" name="label_4">
              <property name="text">
-              <string>垃圾吊4</string>
+              <string>#3垃圾吊</string>
              </property>
             </widget>
            </item>
@@ -818,7 +842,7 @@
            <item>
             <widget class="QLabel" name="label_8">
              <property name="text">
-              <string>升降4</string>
+              <string>#4升降</string>
              </property>
             </widget>
            </item>
@@ -868,9 +892,16 @@
        <item row="0" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_11">
          <item>
+          <widget class="QLabel" name="label_36">
+           <property name="text">
+            <string>#1料口</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>1号料位 最高</string>
+            <string>最高</string>
            </property>
           </widget>
          </item>
@@ -904,9 +935,16 @@
        <item row="1" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_13">
          <item>
+          <widget class="QLabel" name="label_37">
+           <property name="text">
+            <string>#2料口</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_11">
            <property name="text">
-            <string>2号料位 最高</string>
+            <string>最高</string>
            </property>
           </widget>
          </item>
@@ -940,9 +978,16 @@
        <item row="2" column="0">
         <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
+          <widget class="QLabel" name="label_38">
+           <property name="text">
+            <string>#3料口</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QLabel" name="label_13">
            <property name="text">
-            <string>3号料位 最高</string>
+            <string>最高</string>
            </property>
           </widget>
          </item>
