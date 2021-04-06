@@ -1,5 +1,6 @@
 ﻿#pragma execution_character_set("utf-8")
 #include "QuestClient.h"
+#include <windows.h>
 
 QuestClient::QuestClient(QWidget* parent)
 	: QMainWindow(parent)
@@ -7,233 +8,199 @@ QuestClient::QuestClient(QWidget* parent)
 {
 	ui.setupUi(this);
 
-	connect(ui.chooseQuestPath, &QPushButton::clicked, [=]
-		{
-			const auto filePath = QFileDialog::getOpenFileName(this, "Choose Quest", ui.questPath->text(), "Quest.bat(Quest.bat)");
-			if (!filePath.isEmpty())
-			{
-				ui.questPath->setText(filePath);
-			}
-		});
+	ui.agvReportTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+	logFile.open(QFile::Append);
 
-	connect(ui.runQuest, &QPushButton::clicked, [=]
-		{
-			if (!QFile(ui.questPath->text()).exists())
-			{
-				QMessageBox::warning(this, "启动失败", "Quest路径无效");
-			}
-			QProcess::execute(ui.questPath->text(), { "-s", ui.port->text() });
-			QTimer::singleShot(500, [=] {
-				questSocket.connectToHost(ui.hostame->text(), ui.port->text().toInt());
-				});
-		});
+	connect(qApp, &QApplication::lastWindowClosed, &logFile, &QFile::close);
 
-	connect(ui.closeQuest, &QPushButton::clicked, [=]
-		{
-			if (QMessageBox::warning(this, "确认", "确认关闭Quest？", QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
-			{
-				if (questSocket.write("EXIT"))
-				{
-					questSocket.disconnectToHost();
-				}
-			}
+	if (!QFile(questPath).exists())
+	{
+		QMessageBox::warning(this, "启动失败", "Quest路径无效");
+		return;
+	}
+
+	QProcess::execute(questPath, { "-s", QString::number(questPort) });
+	QTimer::singleShot(500, [=] {
+		questSocket.connectToHost("localhost", questPort);
 		});
-	
-	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
-		{
-			ui.connectCheck->setChecked(questSocket.isConnected());
-			appendSystemMessage(QString{ "Error Occurred.(%1)" }.arg(code));
-		}, Qt::QueuedConnection);
 
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
-			ui.connectCheck->setChecked(questSocket.isConnected());
-			appendSystemMessage("Connected.");
+			ui.logBrowser->append(QString("%1 [System] Connected.")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")));
+			logFile.write(QString("%1 [System] Connected.\n")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				.toLatin1());
+			logFile.flush();
 		}, Qt::QueuedConnection);
-	connect(&questSocket, &DenebTcpSocket::disconnected, this, [=]
+	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
 		{
-			ui.connectCheck->setChecked(questSocket.isConnected());
-			appendSystemMessage("Disconnected.");
+			ui.logBrowser->append(QString("%1 [System] Error Occurred.(%2)")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				.arg(code));
+			logFile.write(QString("%1 [System] Error Occurred.(%2)\n")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				.arg(code)
+				.toLatin1());
+			logFile.flush();
+
+			QMessageBox::warning(this, "错误", QString{ "Error Occurred.(%1)" }.arg(code));
 		}, Qt::QueuedConnection);
 
-	connect(ui.connectCheck, &QCheckBox::clicked, [=](bool checked)
+	connect(ui.resetButton, &QPushButton::clicked, [=]
 		{
-			if (checked)
-			{
-				questSocket.connectToHost(ui.hostame->text(), ui.port->text().toInt());
-			}
-			else
-			{
-				questSocket.disconnectToHost();
-			}
-		});
-
-	connect(ui.sendCommand, &QPushButton::clicked, [=]
-		{
-			sendCommand(ui.command->text());
-			ui.command->clear();
+			sendCommand("RESET RUN");
 		});
 
 	connect(ui.startSim, &QPushButton::clicked, [=]
 		{
 			sendCommand(QString("SET ANIMATION MODE %1").arg(ui.animationMode->isChecked() ? "ON" : "OFF"));
+			questSocket.waitReceived();
 			sendCommand(QString("SET SIMULATION TIME INTERVAL TO %1").arg(ui.simInterval->text()));
-			sendCommand(QString("RUN %1").arg(ui.simtime->text()));
-		});
-	
-	connect(ui.resetSim, &QPushButton::clicked, [=]
-		{
-			sendCommand("RESET RUN");
+			questSocket.waitReceived();
+			sendCommand(QString("RUN %1").arg(planSimTime));
+
+			if (questSocket.waitReceived(1000 * 60 * 5))
+				QMessageBox::information(this, "完成", "仿真完成");
 		});
 
-	connect(ui.continueSim, &QPushButton::clicked, [=]
-		{
-			sendCommand(QString("SET ANIMATION MODE %1").arg(ui.animationMode->isChecked() ? "ON" : "OFF"));
-			sendCommand(QString("SET SIMULATION TIME INTERVAL TO %1").arg(ui.simInterval->text()));
-			sendCommand(QString("CONTINUE FOR %1").arg(ui.simtime->text()));
-		});
-		
-	connect(ui.chooseModel, &QPushButton::clicked, [=]
-		{
-			const auto filePath = QFileDialog::getOpenFileName(this, "Choose Model", ui.modelPath->text(), "Model Files(*.mdl);;All Files(*.*)");
-			if (!filePath.isEmpty())
-			{
-				ui.modelPath->setText(filePath);
-			}
-		});
-
-	connect(ui.readModel, &QPushButton::clicked, [=]
-		{
-			sendCommand("CLEAR ALL");
-			sendCommand(QString("READ MODEL '%1'").arg(ui.modelPath->text()));
-
-			if (ui.bigChoice->isChecked()|| ui.bigChoiceDump->isChecked())
-				sendSetUserAttributeCommand("Source_time", "modetag", QString::number(ui.bigChoiceDump->isChecked()));
-		});
-
-	connect(ui.transferToMenu, &QPushButton::clicked, [=]
+	connect(ui.debugButton, &QPushButton::clicked, [=]
 		{
 			sendCommand("TRANSFER TO MENU");
 		});
 
 	connect(ui.updateReport, &QPushButton::clicked, [=]
 		{
-			auto maxGyNum = sendInquireUserAttributeCommand("Source_time", "max_gy_num", true).toDouble();
-			auto maxShNum = sendInquireUserAttributeCommand("Source_time", "max_sh_num", true).toDouble();
+			int gy_xieliao[4]{ 0,0,0,0 }, sh_xieliao[4]{ 0,0,0,0 }, dgy_xieliao[4]{ 0,0,0,0 }, dgy_xieliao_sum[4]{ 0,0,0,0 }, touliao[4][3]{};
+			double agvUserPercentFixed[4]{};
 			auto liaoCangTotal = sendInquireUserAttributeCommand("Source_time", "liaocangtotal", true).toDouble();
 
-
-			auto gy_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "gy_xieliao", true).toDouble();
-			auto sh_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "sh_xieliao", true).toDouble();
-			auto dgy_xieliao2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "dgy_xieliao", true).toDouble();
-			auto touliao1_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao1", true).toDouble();
-			auto touliao2_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao2", true).toDouble();
-			auto touliao3_2 = sendInquireUserAttributeCommand("gd_Crane_AGV2", "touliao3", true).toDouble();
-
-			auto gy_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "gy_xieliao", true).toDouble();
-			auto sh_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "sh_xieliao", true).toDouble();
-			auto dgy_xieliao3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "dgy_xieliao", true).toDouble();
-			auto touliao1_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao1", true).toDouble();
-			auto touliao2_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao2", true).toDouble();
-			auto touliao3_3 = sendInquireUserAttributeCommand("gd_Crane_AGV3", "touliao3", true).toDouble();
-
-			auto gy_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "gy_xieliao", true).toDouble();
-			auto sh_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "sh_xieliao", true).toDouble();
-			auto dgy_xieliao4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "dgy_xieliao", true).toDouble();
-			auto touliao1_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao1", true).toDouble();
-			auto touliao2_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao2", true).toDouble();
-			auto touliao3_4 = sendInquireUserAttributeCommand("gd_Crane_AGV4", "touliao3", true).toDouble();
-
-			auto simTime = sendInquireUserAttributeCommand("Source_time", "u_sim_time", true).toDouble();
-			auto firstSimTime = sendInquireUserAttributeCommand("Source_time", "u_first_use_time", true).toDouble();
-			if (simTime == 0.0)
-				simTime = 0.000001;
-			double agvBusyProc[4], agvBusyTime[4], agvBusyWaitTime[4], agvLoadTime[4], agvUnloadTime[4], agvEmptyTravelTime[4], agvFirstUseTime[4];
-			double agvUsePercent[4], agvUserPercentFixed[4];
-
-			for (int i = 0; i < 4; ++i)
+			for (int i = 1; i < 4; ++i)
 			{
-				agvBusyProc[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_proc_time", true).toDouble();
-				agvBusyTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_time", true).toDouble();
-				agvBusyWaitTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_busy_wait_time", true).toDouble();
-				agvLoadTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_load_time", true).toDouble();
-				agvUnloadTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_unload_time", true).toDouble();
-				agvEmptyTravelTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_empty_travel_time", true).toDouble();
-				agvFirstUseTime[i] = sendInquireUserAttributeCommand(QString("gd_Crane_AGV%1").arg(i + 1), "u_first_use_time", true).toDouble();
-				agvUsePercent[i] = (agvLoadTime[i] + agvUnloadTime[i] + agvEmptyTravelTime[i]) * 3600 / simTime;
+				auto agvName = QString("gd_Crane_AGV%1").arg(i + 1);
+				gy_xieliao[i] = sendInquireUserNumericAttributeCommand(agvName, "gy_xieliao", true);
+				sh_xieliao[i] = sendInquireUserNumericAttributeCommand(agvName, "sh_xieliao", true);
+				dgy_xieliao[i] = sendInquireUserNumericAttributeCommand(agvName, "dgy_xieliao", true);
+				dgy_xieliao_sum[i] = dgy_xieliao[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
 
-				if (simTime > 86400)
-					agvUserPercentFixed[i] = (agvLoadTime[i] + agvUnloadTime[i] + agvEmptyTravelTime[i] - agvFirstUseTime[i]) * 3600 / (simTime - firstSimTime);
-				else
-					agvUserPercentFixed[i] = 0;
+				touliao[i][0] = sendInquireUserNumericAttributeCommand(agvName, "touliao1", true);
+				touliao[i][1] = sendInquireUserNumericAttributeCommand(agvName, "touliao2", true);
+				touliao[i][2] = sendInquireUserNumericAttributeCommand(agvName, "touliao3", true);
+
+				agvUserPercentFixed[i] = sendInquireUserNumericAttributeCommand(agvName, "u_use_rate", true);
 			}
+			*std::max_element(dgy_xieliao_sum, dgy_xieliao_sum + 4) += 160;
 
-			if (ui.bigChoice->isChecked() || ui.bigChoiceDump->isChecked())
+			ui.dgyTotal->setText(QString::number(dgy_xieliao_sum[1] + dgy_xieliao_sum[2] + dgy_xieliao_sum[3]));
+			ui.liaocangTotal->setText(QString::number(liaoCangTotal));
+			ui.touluTotal->setText(QString::number(
+				(touliao[1][0] + touliao[1][1] + touliao[1][2]
+					+ touliao[2][0] + touliao[2][1] + touliao[2][2]
+					+ touliao[3][0] + touliao[3][1] + touliao[3][2]) * 9
+			));
+
+			for (int i = 1; i < 4; ++i)
 			{
-				maxGyNum *= 6;
-				maxShNum *= 6;
+				ui.agvReportTable->item(0, i - 1)->setText(QString::number(touliao[i][0]));
+				ui.agvReportTable->item(1, i - 1)->setText(QString::number(touliao[i][1]));
+				ui.agvReportTable->item(2, i - 1)->setText(QString::number(touliao[i][2]));
+				ui.agvReportTable->item(3, i - 1)->setText(QString::number(touliao[i][0] * 9));
+				ui.agvReportTable->item(4, i - 1)->setText(QString::number(touliao[i][1] * 9));
+				ui.agvReportTable->item(5, i - 1)->setText(QString::number(touliao[i][2] * 9));
+				ui.agvReportTable->item(6, i - 1)->setText(QString::number(agvUserPercentFixed[i]));
+				ui.agvReportTable->item(7, i - 1)->setText(QString::number(agvUserPercentFixed[i] * 24));
+				ui.agvReportTable->item(8, i - 1)->setText(QString::number(gy_xieliao[i]));
+				ui.agvReportTable->item(9, i - 1)->setText(QString::number(gy_xieliao[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5)));
+				ui.agvReportTable->item(10, i - 1)->setText(QString::number(sh_xieliao[i]));
+				ui.agvReportTable->item(11, i - 1)->setText(QString::number(sh_xieliao[i] * 8));
+				ui.agvReportTable->item(12, i - 1)->setText(QString::number(dgy_xieliao[i]));
+				ui.agvReportTable->item(13, i - 1)->setText(QString::number(dgy_xieliao_sum[i]));
 			}
-			else
-			{
-				maxGyNum *= 3.5;
-				maxShNum *= 3.5;
-			}
-
-			ui.reportBrowser->append(QString(R"([%0]Report
-料仓统计 %1t
-送往左侧工业仓垃圾 %2t
-送往左侧生活仓垃圾 %3t
-
-行车	工业卸料	生活卸料 大工业仓卸料	投料1	投料2	投料3	利用率
-AGV2	%4	%5	%6	%7	%8	%9	%10
-AGV3	%11	%12	%13	%14	%15	%16	%17
-AGV4	%18	%19	%20	%21	%22	%23	%24
-
-投料口	数量
-料口1	%25t
-料口2	%26t
-料口3	%27t
-
-)")
-.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-.arg(liaoCangTotal).arg(maxGyNum).arg(maxShNum)
-.arg(gy_xieliao2).arg(sh_xieliao2).arg(dgy_xieliao2).arg(touliao1_2).arg(touliao2_2).arg(touliao3_2).arg(agvUserPercentFixed[1])
-.arg(gy_xieliao3).arg(sh_xieliao3).arg(dgy_xieliao3).arg(touliao1_3).arg(touliao2_3).arg(touliao3_3).arg(agvUserPercentFixed[2])
-.arg(gy_xieliao4).arg(sh_xieliao4).arg(dgy_xieliao4).arg(touliao1_4).arg(touliao2_4).arg(touliao3_4).arg(agvUserPercentFixed[3])
-.arg((touliao1_2 + touliao1_3 + touliao1_4) * 9)
-.arg((touliao2_2 + touliao2_3 + touliao2_4) * 9)
-.arg((touliao3_2 + touliao3_3 + touliao3_4) * 9)
-);
-		});
-
-	connect(ui.reportBrowser, &QTextBrowser::customContextMenuRequested, [=]
-		{
-			QMenu menu{ this };
-			menu.addAction("全选", ui.reportBrowser, &QTextBrowser::selectAll);
-			menu.addAction("复制", ui.reportBrowser, &QTextBrowser::copy);
-			menu.addAction("清除", ui.reportBrowser, &QTextBrowser::clear);
-			menu.exec(QCursor::pos());
 		});
 
 	connect(ui.exportReport, &QPushButton::clicked, [=]
 		{
-			QFile exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "文本文件(*.txt)");
-		if(exportFile.exists())
-		{
-			exportFile.open(QFile::WriteOnly);
-			exportFile.write(ui.reportBrowser->toPlainText().toLatin1());
-			exportFile.close();
-		}
-		});
+			auto exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "Excel 文件(*.xls *.xlsx)");
+			if (exportFile.isEmpty())
+				return;
+			if (auto excel = new QAxObject{ this }; excel->setControl("Excel.Application")) //连接Excel控件
+			{
+				excel->dynamicCall("SetVisible (bool Visible)", "false");//不显示窗体
+				excel->setProperty("DisplayAlerts", false);//不显示任何警告信息。如果为true那么在关闭是会出现类似“文件已修改，是否保存”的提示
+				auto workbooks = excel->querySubObject("WorkBooks");//获取工作簿集合
+				workbooks->dynamicCall("Add");//新建一个工作簿
+				auto workbook = excel->querySubObject("ActiveWorkBook");//获取当前工作簿
+				auto worksheet = workbook->querySubObject("Worksheets(int)", 1);
+				auto table = ui.agvReportTable;
 
-	connect(ui.quickCommand, &QPushButton::clicked, [=]
-		{
-			if (ui.quickCommandMode->currentText() == "设置")
-				sendSetUserAttributeCommand(ui.element->text(), ui.attrib->text()
-					, ui.value->text(), ui.elementMode->currentText() == "实例");
+				int colCount = table->columnCount();
+				int rowCount = table->rowCount();
+
+				//标题行
+				auto cell = worksheet->querySubObject("Cells(int,int)", 1, 1);
+				cell->dynamicCall("SetValue(const QString&)", "报表统计");
+				cell->querySubObject("Font")->setProperty("Size", 18);
+				//调整行高
+				worksheet->querySubObject("Range(const QString&)", "1:1")->setProperty("RowHeight", 30);
+				//合并标题行
+				auto range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A1:%c1", colCount + 'A'));
+				range->setProperty("WrapText", true);
+				range->setProperty("MergeCells", true);
+				range->setProperty("HorizontalAlignment", -4108);//xlCenter
+				range->setProperty("VerticalAlignment", -4108);//xlCenter
+				//列标题
+				for (int i = 0; i < colCount; i++)
+				{
+					auto col = worksheet->querySubObject("Columns(const QString&)", QString::asprintf("%c:%c", i + 'B', i + 'B'));
+					col->setProperty("ColumnWidth", table->columnWidth(i) / 6);
+					auto cell = worksheet->querySubObject("Cells(int,int)", 2, i + 2);
+					cell->dynamicCall("SetValue(const QString&)", table->horizontalHeaderItem(i)->text());
+					cell->querySubObject("Font")->setProperty("Bold", true);
+					cell->setProperty("HorizontalAlignment", -4108);//xlCenter
+					cell->setProperty("VerticalAlignment", -4108);//xlCenter
+				}
+
+				worksheet->querySubObject("Columns(const QString&)", "A:A")
+					->setProperty("ColumnWidth", table->verticalHeader()->width() / 6);
+				// 行标题
+				for (int i = 0; i < rowCount; i++)
+				{
+					auto cell = worksheet->querySubObject("Cells(int,int)", i + 3, 1);
+					cell->dynamicCall("SetValue(const QString&)", table->verticalHeaderItem(i)->text());
+					cell->querySubObject("Font")->setProperty("Bold", true);
+					cell->setProperty("HorizontalAlignment", -4108);//xlCenter
+					cell->setProperty("VerticalAlignment", -4108);//xlCenter
+				}
+				//数据区
+				for (int i = 0; i < table->rowCount(); i++) {
+					for (int j = 0; j < colCount; j++)
+					{
+						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QString&)", table->item(i, j) ? table->item(i, j)->text() : "");
+					}
+				}
+				//画框线
+				QString lrange;
+				lrange.append("A2:");
+				lrange.append(colCount + 'A');
+				lrange.append(QString::number(table->rowCount() + 2));
+				range = worksheet->querySubObject("Range(const QString&)", lrange);
+				range->querySubObject("Borders")->setProperty("LineStyle", QString::number(1));
+				range->querySubObject("Borders")->setProperty("Color", QColor(0, 0, 0));
+				//调整数据区行高
+				QString rowsName;
+				rowsName.append("2:");
+				rowsName.append(QString::number(table->rowCount() + 2));
+				range = worksheet->querySubObject("Range(const QString&)", rowsName);
+				range->setProperty("RowHeight", 20);
+				workbook->dynamicCall("SaveAs(const QString&)", QDir::toNativeSeparators(exportFile));//保存至fileName
+				workbook->dynamicCall("Close()");//关闭工作簿
+				excel->dynamicCall("Quit()");//关闭excel
+				excel->deleteLater();
+			}
 			else
-				ui.value->setText(sendInquireUserAttributeCommand(ui.element->text(), ui.attrib->text()
-					, ui.elementMode->currentText() == "实例"));
+			{
+				QMessageBox::warning(NULL, "错误", "未能创建 Excel 对象，请安装 Microsoft Excel。", QMessageBox::Apply);
+			}
 		});
 
 	connect(ui.sendAGVSpeed, &QPushButton::clicked, [=]
@@ -252,7 +219,7 @@ AGV4	%18	%19	%20	%21	%22	%23	%24
 			sendSetCommand("gd_Hoist3", "SPEED", ui.hoistSpeed3->text());
 			sendSetCommand("gd_Hoist4", "SPEED", ui.hoistSpeed4->text());
 		});
-	
+
 	connect(ui.sendTime, &QPushButton::clicked, [=]
 		{
 			sendSetCommand("Buffer_LK3_2_upload", "LOAD TIME", ui.loadTime->text());
@@ -264,7 +231,7 @@ AGV4	%18	%19	%20	%21	%22	%23	%24
 			sendSetCommand("Dec_LK4_DL_upload", "LOAD TIME", ui.loadTime->text());
 
 			sendSetCommand("Dec_LK1_DL_download", "UNLOAD TIME", ui.unloadDLTime->text());
-		
+
 			sendSetCommand("Buffer_LK3_2_download", "UNLOAD TIME", ui.unloadTime->text());
 			sendSetCommand("Buffer_LK3_2_download2", "UNLOAD TIME", ui.unloadTime->text());
 			sendSetCommand("Buffer_LK5_2_download", "UNLOAD TIME", ui.unloadTime->text());
@@ -281,46 +248,89 @@ AGV4	%18	%19	%20	%21	%22	%23	%24
 			sendSetUserAttributeCommand("Buffer_TL_3", "lowest", toBlockCount(ui.levelL3->text()));
 		});
 
-	connect(ui.solution1Choice, &QCheckBox::clicked, [=]
+	connect(ui.solution1Choice, &QRadioButton::clicked, [=]
 		{
-			ui.modelPath->setEnabled(false);
-			ui.chooseModel->setEnabled(false);
-			ui.modelPath->setText(R"(D:\deneb\GDWJ1\MODELS\GDWJ.mdl)");
+			ui.useBigGrab->setEnabled(false);
+			ui.usePeakTime->setEnabled(false);
+			ui.useBigGrab->setChecked(false);
+			ui.usePeakTime->setChecked(false);
+			solutionChoice = 1;
 		});
-	connect(ui.littleChoice, &QCheckBox::clicked, [=]
+	connect(ui.solution2Choice, &QRadioButton::clicked, [=]
 		{
-			ui.modelPath->setEnabled(false);
-			ui.chooseModel->setEnabled(false);
-			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane\MODELS\GDWJ.mdl)");
+			ui.useBigGrab->setEnabled(true);
+			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
+			if (!ui.usePeakTime->isEnabled())
+				ui.usePeakTime->setChecked(false);
+			solutionChoice = 2;
 		});
-	connect(ui.bigChoice, &QCheckBox::clicked, [=]
+	connect(ui.solution3Choice, &QRadioButton::clicked, [=]
 		{
-			ui.modelPath->setEnabled(false);
-			ui.chooseModel->setEnabled(false);
-			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl)");
+			ui.useBigGrab->setEnabled(true);
+			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
+			if (!ui.usePeakTime->isEnabled())
+				ui.usePeakTime->setChecked(false);
+			solutionChoice = 3;
 		});
-	connect(ui.bigChoiceDump, &QCheckBox::clicked, [=]
+	connect(ui.useBigGrab, &QCheckBox::clicked, [=]
 		{
-			ui.modelPath->setEnabled(false);
-			ui.chooseModel->setEnabled(false);
-			ui.modelPath->setText(R"(D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl)");
+			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
+			if (!ui.useBigGrab->isChecked())
+				ui.usePeakTime->setChecked(false);
 		});
-	connect(ui.customChoice, &QCheckBox::clicked, [=]
+
+	connect(ui.loadModel, &QPushButton::clicked, [=]
 		{
-			ui.modelPath->setEnabled(true);
-			ui.chooseModel->setEnabled(true);
+			sendCommand("CLEAR ALL");
+			questSocket.waitReceived();
+			if (solutionChoice == 1)
+			{
+				planSimTime = 86400 * 2;
+				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ1\MODELS\GDWJ.mdl')");
+			}
+			else if (solutionChoice == 2 || solutionChoice == 3)
+			{
+				if (ui.useBigGrab->isChecked())
+				{
+					planSimTime = 86400 * 2;
+					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl')");
+				}
+				else
+				{
+					planSimTime = 86400 * 3;
+					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane\MODELS\GDWJ.mdl')");
+				}
+
+				sendSetUserAttributeCommand("Source_time", "mode3", QString::number(solutionChoice == 3));
+				sendSetUserAttributeCommand("Source_time", "modetag", QString::number(ui.usePeakTime->isChecked()));
+			}
 		});
 
 	connect(&questSocket, &DenebTcpSocket::received, [=]
 		{
 			currentReceivedMessage = QString::fromLatin1(questSocket.read());
-			appendQuestMessage(currentReceivedMessage);
+
+			ui.logBrowser->append(QString("%1 [Simulation] %2")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				.arg(currentReceivedMessage));
+			logFile.write(QString("%1 [Simulation] %2\n")
+				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				.arg(currentReceivedMessage).toLatin1());
+			logFile.flush();
 		});
 }
 
 void QuestClient::sendCommand(QString command) const
 {
-	appendClientMessage(QString{ "%1 [%2]" }.arg(command, questSocket.write(command.toLatin1()) ? "SUCCESS" : "FAILED"));
+	questSocket.write(command.toLatin1());
+
+	ui.logBrowser->append(QString("%1 [Client] %2")
+		.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+		.arg(command));
+	logFile.write(QString("%1 [Client] %2\n")
+		.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+		.arg(command).toLatin1());
+	logFile.flush();
 }
 
 void QuestClient::sendSetCommand(QString name, QString attribute, QString value, bool isInstance) const
@@ -340,17 +350,7 @@ QString QuestClient::sendInquireUserAttributeCommand(QString name, QString attri
 	return currentReceivedMessage.section(QRegExp("[:;]"), 1, 1).trimmed();
 }
 
-void QuestClient::appendClientMessage(QString msg) const
+double QuestClient::sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance) const
 {
-	ui.chatBrowser->append(QString{ "[Client]: %1" }.arg(msg));
-}
-
-void QuestClient::appendSystemMessage(QString msg) const
-{
-	ui.chatBrowser->append(QString{ "[System]: %1" }.arg(msg));
-}
-
-void QuestClient::appendQuestMessage(QString msg) const
-{
-	ui.chatBrowser->append(QString{ "[Quest]: %1" }.arg(msg));
+	return sendInquireUserAttributeCommand(name, attribute, isInstance).toDouble();
 }

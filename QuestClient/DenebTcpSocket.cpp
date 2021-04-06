@@ -31,7 +31,7 @@ DenebTcpSocket::DenebTcpSocket(QObject* parent)
 			else if (code > 0 && !hasMessage)
 			{
 				hasMessage = true;
-				emit received();				
+				emit received();
 			}
 		}, Qt::QueuedConnection);
 }
@@ -62,7 +62,6 @@ void DenebTcpSocket::disconnectToHost()
 	{
 		m_connected = false;
 		emit disconnected(net_close_socket(m_socket));
-
 	}
 	m_receiveTimer->stop();
 }

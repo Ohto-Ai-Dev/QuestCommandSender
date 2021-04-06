@@ -7,6 +7,7 @@
 #include <QProcess>
 #include <QMenu>
 #include <QDateTime>
+#include <QAxObject>
 #include "DenebTcpSocket.h"
 #include "ui_QuestClient.h"
 
@@ -21,12 +22,17 @@ public:
 	void sendSetCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
 	void sendSetUserAttributeCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
 	QString sendInquireUserAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
+	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 
-protected:
-	void appendClientMessage(QString) const;
-	void appendSystemMessage(QString) const;
-	void appendQuestMessage(QString) const;
 private:
+	mutable QFile logFile{ "application.log", this };
+	static inline QString questPath = R"(D:\deneb\quest\quest.bat)";
+	static inline int questPort = 9988;
+
+	int solutionChoice = 0;
+
+	int planSimTime = 86400;
+
 	QString currentReceivedMessage{};
 	Ui::QuestClientClass ui;
 	using Socket = int;
