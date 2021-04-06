@@ -297,7 +297,7 @@ QuestClient::QuestClient(QWidget* parent)
 				}
 				else
 				{
-					planSimTime = 86400 * 3;
+					planSimTime = 86400 * 4;
 					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane\MODELS\GDWJ.mdl')");
 				}
 
