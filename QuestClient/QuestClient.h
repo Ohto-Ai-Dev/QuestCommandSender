@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QDateTime>
 #include <QAxObject>
+#include <json.hpp>
 #include "DenebTcpSocket.h"
 #include "ui_QuestClient.h"
 
@@ -25,11 +26,11 @@ public:
 	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 
 private:
+	static inline const char* configPath{ "application.json" };
+	nlohmann::json config;
 	mutable QFile logFile{ "application.log", this };
 	static inline QString questPath = R"(D:\deneb\quest\quest.bat)";
 	static inline int questPort = 9988;
-
-	int solutionChoice = 0;
 
 	int planSimTime = 86400;
 

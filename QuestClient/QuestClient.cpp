@@ -8,6 +8,44 @@ QuestClient::QuestClient(QWidget* parent)
 {
 	ui.setupUi(this);
 
+	if (QFile configFile{ configPath }; !configFile.exists())
+	{
+		configFile.open(QFile::WriteOnly);
+		configFile.write(R"(
+{
+  "application_name": "QuestClient.exe",
+  "version": "v1.0",
+  "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
+  "quest_port":9988,
+  "solution1": {
+    "plan_sim_time": 172800
+  },
+  "solution2": {
+    "use_big_grab": {
+      "plan_sim_time": 172800
+    },
+    "run_time": 345600
+  },
+  "solution3": {
+    "use_big_grab": {
+      "plan_sim_time": 172800
+    },
+    "plan_sim_time": 345600
+  },
+  "log_to_file": false,
+  "log_to_window": true
+}
+)");
+		configFile.close();
+	}
+	QFile configFile{ configPath };
+	configFile.open(QFile::ReadOnly);
+	config = nlohmann::json::parse(configFile.readAll().toStdString());
+	configFile.close();
+
+	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
+	questPort = config["quest_port"].get<int>();
+
 	ui.agvReportTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 	logFile.open(QFile::Append);
 
@@ -26,24 +64,31 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
-			ui.logBrowser->append(QString("%1 [System] Connected.")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")));
-			logFile.write(QString("%1 [System] Connected.\n")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-				.toLatin1());
-			logFile.flush();
+			if (config["log_to_window"])
+				ui.logBrowser->append(QString("%1 [System] Connected.")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")));
+			if (config["log_to_file"])
+			{
+				logFile.write(QString("%1 [System] Connected.\n")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.toLatin1());
+				logFile.flush();
+			}
 		}, Qt::QueuedConnection);
 	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
 		{
-			ui.logBrowser->append(QString("%1 [System] Error Occurred.(%2)")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-				.arg(code));
-			logFile.write(QString("%1 [System] Error Occurred.(%2)\n")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-				.arg(code)
-				.toLatin1());
-			logFile.flush();
-
+			if (config["log_to_window"])
+				ui.logBrowser->append(QString("%1 [System] Error Occurred.(%2)")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(code));
+			if (config["log_to_file"])
+			{
+				logFile.write(QString("%1 [System] Error Occurred.(%2)\n")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(code)
+					.toLatin1());
+				logFile.flush();
+			}
 			QMessageBox::warning(this, "错误", QString{ "Error Occurred.(%1)" }.arg(code));
 		}, Qt::QueuedConnection);
 
@@ -89,7 +134,7 @@ QuestClient::QuestClient(QWidget* parent)
 
 				agvUserPercentFixed[i] = sendInquireUserNumericAttributeCommand(agvName, "u_use_rate", true);
 			}
-			*std::max_element(dgy_xieliao_sum, dgy_xieliao_sum + 4) += 160;
+			*std::max_element(dgy_xieliao_sum + 1, dgy_xieliao_sum + 4) += 160;
 
 			ui.dgyTotal->setText(QString::number(dgy_xieliao_sum[1] + dgy_xieliao_sum[2] + dgy_xieliao_sum[3]));
 			ui.liaocangTotal->setText(QString::number(liaoCangTotal));
@@ -254,7 +299,6 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(false);
 			ui.useBigGrab->setChecked(false);
 			ui.usePeakTime->setChecked(false);
-			solutionChoice = 1;
 		});
 	connect(ui.solution2Choice, &QRadioButton::clicked, [=]
 		{
@@ -262,7 +306,6 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
 			if (!ui.usePeakTime->isEnabled())
 				ui.usePeakTime->setChecked(false);
-			solutionChoice = 2;
 		});
 	connect(ui.solution3Choice, &QRadioButton::clicked, [=]
 		{
@@ -270,7 +313,6 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
 			if (!ui.usePeakTime->isEnabled())
 				ui.usePeakTime->setChecked(false);
-			solutionChoice = 3;
 		});
 	connect(ui.useBigGrab, &QCheckBox::clicked, [=]
 		{
@@ -283,25 +325,26 @@ QuestClient::QuestClient(QWidget* parent)
 		{
 			sendCommand("CLEAR ALL");
 			questSocket.waitReceived();
-			if (solutionChoice == 1)
+
+			if (ui.solution1Choice->isChecked())
 			{
-				planSimTime = 86400 * 2;
+				planSimTime = config["solution1"]["plan_sim_time"].get<int>();
 				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ1\MODELS\GDWJ.mdl')");
 			}
-			else if (solutionChoice == 2 || solutionChoice == 3)
+			else
 			{
 				if (ui.useBigGrab->isChecked())
 				{
-					planSimTime = 86400 * 2;
+					planSimTime = config[ui.solution2Choice->isChecked() ? "solution2" : "solution3"]["use_big_grab"]["plan_sim_time"].get<int>();
 					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl')");
 				}
 				else
 				{
-					planSimTime = 86400 * 4;
+					planSimTime = config[ui.solution2Choice->isChecked() ? "solution2" : "solution3"]["plan_sim_time"].get<int>();
 					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane\MODELS\GDWJ.mdl')");
 				}
 
-				sendSetUserAttributeCommand("Source_time", "mode3", QString::number(solutionChoice == 3));
+				sendSetUserAttributeCommand("Source_time", "mode3", QString::number(ui.solution3Choice->isChecked()));
 				sendSetUserAttributeCommand("Source_time", "modetag", QString::number(ui.usePeakTime->isChecked()));
 			}
 		});
@@ -310,13 +353,17 @@ QuestClient::QuestClient(QWidget* parent)
 		{
 			currentReceivedMessage = QString::fromLatin1(questSocket.read());
 
-			ui.logBrowser->append(QString("%1 [Simulation] %2")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-				.arg(currentReceivedMessage));
-			logFile.write(QString("%1 [Simulation] %2\n")
-				.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-				.arg(currentReceivedMessage).toLatin1());
-			logFile.flush();
+			if (config["log_to_window"])
+				ui.logBrowser->append(QString("%1 [Simulation] %2")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(currentReceivedMessage));
+			if (config["log_to_file"])
+			{
+				logFile.write(QString("%1 [Simulation] %2\n")
+					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(currentReceivedMessage).toLatin1());
+				logFile.flush();
+			}
 		});
 }
 
@@ -324,13 +371,17 @@ void QuestClient::sendCommand(QString command) const
 {
 	questSocket.write(command.toLatin1());
 
-	ui.logBrowser->append(QString("%1 [Client] %2")
-		.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-		.arg(command));
-	logFile.write(QString("%1 [Client] %2\n")
-		.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
-		.arg(command).toLatin1());
-	logFile.flush();
+	if (config["log_to_window"])
+		ui.logBrowser->append(QString("%1 [Client] %2")
+			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+			.arg(command));
+	if (config["log_to_file"])
+	{
+		logFile.write(QString("%1 [Client] %2\n")
+			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+			.arg(command).toLatin1());
+		logFile.flush();
+	}
 }
 
 void QuestClient::sendSetCommand(QString name, QString attribute, QString value, bool isInstance) const

@@ -1,0 +1,23 @@
+﻿{
+  "application_name": "QuestClient.exe",
+  "version": "v1.0",
+  "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
+  "quest_port":9988,
+  "solution1": {
+    "plan_sim_time": 172800
+  },
+  "solution2": {
+    "use_big_grab": {
+      "plan_sim_time": 172800
+    },
+    "run_time": 345600
+  },
+  "solution3": {
+    "use_big_grab": {
+      "plan_sim_time": 172800
+    },
+    "plan_sim_time": 345600
+  },
+  "log_to_file": false,
+  "log_to_window": true
+}

@@ -46,6 +46,9 @@
     <ClCompile Include="DenebTcpSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="application.json">
+      <Filter>Resource Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="lib\nettools.obj">
