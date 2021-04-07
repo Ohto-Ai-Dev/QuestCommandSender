@@ -1,4 +1,12 @@
 <RCC>
-    <qresource prefix="QuestClient">
-    </qresource>
+  <qresource prefix="QuestClient">
+    <file>QuestClient.qrc</file>
+    <file>res/excel.png</file>
+    <file>res/update.png</file>
+    <file>res/debug.png</file>
+    <file>res/import.png</file>
+    <file>res/simulate.png</file>
+    <file>res/play.png</file>
+    <file>res/reset.png</file>
+  </qresource>
 </RCC>

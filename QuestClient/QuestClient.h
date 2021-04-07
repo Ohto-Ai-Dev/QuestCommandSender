@@ -8,6 +8,7 @@
 #include <QMenu>
 #include <QEventLoop>
 #include <QDateTime>
+#include <QWindow>
 #include <QAxObject>
 #include <json.hpp>
 #include "DenebTcpSocket.h"
@@ -22,6 +23,7 @@ public:
 
 	void sendCommand(QString) const;
 	void sendSetCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
+	QString sendInquireCommand(QString name, QString attribute, bool isInstance = false)const;
 	void sendSetUserAttributeCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
 	QString sendInquireUserAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;

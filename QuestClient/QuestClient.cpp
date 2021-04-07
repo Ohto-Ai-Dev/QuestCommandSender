@@ -22,7 +22,7 @@ QuestClient::QuestClient(QWidget* parent)
     "use_big_grab": {
       "plan_sim_time": 172800
     },
-    "run_time": 345600
+    "plan_sim_time": 345600
   },
   "solution3": {
     "use_big_grab": {
@@ -154,7 +154,7 @@ QuestClient::QuestClient(QWidget* parent)
 
 				agvUserPercentFixed[i] = sendInquireUserNumericAttributeCommand(agvName, "u_use_rate", true);
 			}
-			*std::max_element(dgy_xieliao_sum + 1, dgy_xieliao_sum + 4) += 160;
+			// *std::max_element(dgy_xieliao_sum + 1, dgy_xieliao_sum + 4) += 160;
 
 			ui.dgyTotal->setText(QString::number(dgy_xieliao_sum[1] + dgy_xieliao_sum[2] + dgy_xieliao_sum[3]));
 			ui.liaocangTotal->setText(QString::number(liaoCangTotal));
@@ -168,14 +168,14 @@ QuestClient::QuestClient(QWidget* parent)
 			{
 				ui.agvReportTable->item(0, i - 1)->setText(QString::number(touliao[i][0]));
 				ui.agvReportTable->item(0, i - 1)->setData(Qt::UserRole, touliao[i][0]);
-				ui.agvReportTable->item(1, i - 1)->setText(QString::number(touliao[i][1]));
-				ui.agvReportTable->item(1, i - 1)->setData(Qt::UserRole, touliao[i][1]);
-				ui.agvReportTable->item(2, i - 1)->setText(QString::number(touliao[i][2]));
-				ui.agvReportTable->item(2, i - 1)->setData(Qt::UserRole, touliao[i][2]);
-				ui.agvReportTable->item(3, i - 1)->setText(QString::number(touliao[i][0] * 9));
-				ui.agvReportTable->item(3, i - 1)->setData(Qt::UserRole, touliao[i][0] * 9);
-				ui.agvReportTable->item(4, i - 1)->setText(QString::number(touliao[i][1] * 9));
-				ui.agvReportTable->item(4, i - 1)->setData(Qt::UserRole, touliao[i][1] * 9);
+				ui.agvReportTable->item(1, i - 1)->setText(QString::number(touliao[i][0] * 9));
+				ui.agvReportTable->item(1, i - 1)->setData(Qt::UserRole, touliao[i][0] * 9);
+				ui.agvReportTable->item(2, i - 1)->setText(QString::number(touliao[i][1]));
+				ui.agvReportTable->item(2, i - 1)->setData(Qt::UserRole, touliao[i][1]);
+				ui.agvReportTable->item(3, i - 1)->setText(QString::number(touliao[i][1] * 9));
+				ui.agvReportTable->item(3, i - 1)->setData(Qt::UserRole, touliao[i][1] * 9);
+				ui.agvReportTable->item(4, i - 1)->setText(QString::number(touliao[i][2]));
+				ui.agvReportTable->item(4, i - 1)->setData(Qt::UserRole, touliao[i][2]);
 				ui.agvReportTable->item(5, i - 1)->setText(QString::number(touliao[i][2] * 9));
 				ui.agvReportTable->item(5, i - 1)->setData(Qt::UserRole, touliao[i][2] * 9);
 				ui.agvReportTable->item(6, i - 1)->setText(QString::asprintf("%.3f%%", agvUserPercentFixed[i] * 100));
@@ -296,7 +296,10 @@ QuestClient::QuestClient(QWidget* parent)
 			sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", ui.agvSpeed2->text());
 			sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", ui.agvSpeed3->text());
 			sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", ui.agvSpeed4->text());
+		});
 
+	connect(ui.sendHoistSpeed, &QPushButton::clicked, [=]
+		{
 			sendSetCommand("gd_Hoist1", "SPEED", ui.hoistSpeed1->text());
 			sendSetCommand("gd_Hoist2", "SPEED", ui.hoistSpeed2->text());
 			sendSetCommand("gd_Hoist3", "SPEED", ui.hoistSpeed3->text());
@@ -407,7 +410,7 @@ QuestClient::QuestClient(QWidget* parent)
 	QEventLoop eventLoop{ this };
 	QTimer::singleShot(config["wait_quest_time"].get<int>(), &eventLoop, &QEventLoop::quit);
 	eventLoop.exec();
-	questSocket.connectToHost("localhost", questPort);
+	questSocket.connectToHost("localhost", questPort);	
 }
 
 void QuestClient::sendCommand(QString command) const
@@ -430,6 +433,13 @@ void QuestClient::sendCommand(QString command) const
 void QuestClient::sendSetCommand(QString name, QString attribute, QString value, bool isInstance) const
 {
 	sendCommand(QString{ "SET %1'%2%3' %4 TO %5" }.arg(isInstance ? "ELEMENT " : "", name, isInstance ? "_1" : "", attribute, value));
+}
+
+QString QuestClient::sendInquireCommand(QString name, QString attribute, bool isInstance) const
+{
+	sendCommand(QString{ "INQ %1'%2%3' %4" }.arg(isInstance ? "ELEMENT " : "", name, isInstance ? "_1" : "", attribute));
+	questSocket.waitReceived();
+	return currentReceivedMessage.section(QRegExp("[:;]"), 1, 1).trimmed();
 }
 
 void QuestClient::sendSetUserAttributeCommand(QString name, QString attribute, QString value, bool isInstance) const

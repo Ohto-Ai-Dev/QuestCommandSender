@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>QuestClient</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="QuestClient.qrc">
+    <normaloff>:/QuestClient/res/simulate.png</normaloff>:/QuestClient/res/simulate.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_5">
     <item row="0" column="0" colspan="2">
@@ -77,6 +81,10 @@
          <property name="text">
           <string>调试</string>
          </property>
+         <property name="icon">
+          <iconset resource="QuestClient.qrc">
+           <normaloff>:/QuestClient/res/debug.png</normaloff>:/QuestClient/res/debug.png</iconset>
+         </property>
         </widget>
        </item>
        <item row="1" column="0" rowspan="2">
@@ -136,6 +144,10 @@
          </property>
          <property name="text">
           <string>载入</string>
+         </property>
+         <property name="icon">
+          <iconset resource="QuestClient.qrc">
+           <normaloff>:/QuestClient/res/import.png</normaloff>:/QuestClient/res/import.png</iconset>
          </property>
         </widget>
        </item>
@@ -204,22 +216,22 @@
          </row>
          <row>
           <property name="text">
-           <string>#2料口投料次数</string>
-          </property>
-         </row>
-         <row>
-          <property name="text">
-           <string>#3料口投料次数</string>
-          </property>
-         </row>
-         <row>
-          <property name="text">
            <string>#1料口投料量</string>
           </property>
          </row>
          <row>
           <property name="text">
+           <string>#2料口投料次数</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
            <string>#2料口投料量</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>#3料口投料次数</string>
           </property>
          </row>
          <row>
@@ -516,6 +528,10 @@
          <property name="text">
           <string>更新报表</string>
          </property>
+         <property name="icon">
+          <iconset resource="QuestClient.qrc">
+           <normaloff>:/QuestClient/res/update.png</normaloff>:/QuestClient/res/update.png</iconset>
+         </property>
         </widget>
        </item>
        <item row="3" column="0" colspan="2">
@@ -572,6 +588,10 @@
         <widget class="QPushButton" name="exportReport">
          <property name="text">
           <string>导出报表</string>
+         </property>
+         <property name="icon">
+          <iconset resource="QuestClient.qrc">
+           <normaloff>:/QuestClient/res/excel.png</normaloff>:/QuestClient/res/excel.png</iconset>
          </property>
         </widget>
        </item>
@@ -637,12 +657,20 @@
         <property name="text">
          <string>开始</string>
         </property>
+        <property name="icon">
+         <iconset resource="QuestClient.qrc">
+          <normaloff>:/QuestClient/res/play.png</normaloff>:/QuestClient/res/play.png</iconset>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="resetButton">
         <property name="text">
          <string>重置</string>
+        </property>
+        <property name="icon">
+         <iconset resource="QuestClient.qrc">
+          <normaloff>:/QuestClient/res/reset.png</normaloff>:/QuestClient/res/reset.png</iconset>
         </property>
        </widget>
       </item>
@@ -656,7 +684,7 @@
         <height>160</height>
        </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+      <layout class="QGridLayout" name="gridLayout_6">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -669,7 +697,7 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item>
+       <item row="0" column="0" colspan="2">
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -873,8 +901,15 @@
          </item>
         </layout>
        </item>
-       <item>
+       <item row="1" column="0">
         <widget class="QPushButton" name="sendAGVSpeed">
+         <property name="text">
+          <string>应用</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="sendHoistSpeed">
          <property name="text">
           <string>应用</string>
          </property>
