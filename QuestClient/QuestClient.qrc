@@ -7,6 +7,8 @@
     <file>res/import.png</file>
     <file>res/simulate.png</file>
     <file>res/play.png</file>
+    <file>res/send.png</file>
+    <file>res/upload.png</file>
     <file>res/reset.png</file>
   </qresource>
 </RCC>

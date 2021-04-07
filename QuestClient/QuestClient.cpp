@@ -84,12 +84,12 @@ QuestClient::QuestClient(QWidget* parent)
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
 			if (config["log_to_window"])
-				ui.logBrowser->append(QString("%1 [System] Connected.")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")));
+				ui.logBrowser->appendPlainText(QString("%1 [System] Connected.")
+					.arg(QTime::currentTime().toString("hh:mm:ss")));
 			if (config["log_to_file"])
 			{
 				logFile.write(QString("%1 [System] Connected.\n")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(QTime::currentTime().toString("hh:mm:ss"))
 					.toLatin1());
 				logFile.flush();
 			}
@@ -97,19 +97,21 @@ QuestClient::QuestClient(QWidget* parent)
 	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
 		{
 			if (config["log_to_window"])
-				ui.logBrowser->append(QString("%1 [System] Error Occurred.(%2)")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				ui.logBrowser->appendPlainText(QString("%1 [System] Error Occurred.(%2)")
+					.arg(QTime::currentTime().toString("hh:mm:ss"))
 					.arg(code));
 			if (config["log_to_file"])
 			{
 				logFile.write(QString("%1 [System] Error Occurred.(%2)\n")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(QTime::currentTime().toString("hh:mm:ss"))
 					.arg(code)
 					.toLatin1());
 				logFile.flush();
 			}
 			QMessageBox::warning(this, "错误", QString{ "Error Occurred.(%1)" }.arg(code));
 		});
+
+	connect(ui.animationMode, &QCheckBox::clicked, ui.simInterval, &QLineEdit::setEnabled);
 
 	connect(ui.resetButton, &QPushButton::clicked, [=]
 		{
@@ -131,6 +133,17 @@ QuestClient::QuestClient(QWidget* parent)
 	connect(ui.debugButton, &QPushButton::clicked, [=]
 		{
 			sendCommand("TRANSFER TO MENU");
+		});
+
+	connect(ui.commandEdit, &QLineEdit::returnPressed, [=]
+		{
+			sendCommand(ui.commandEdit->text());
+			ui.commandEdit->clear();
+		});
+	connect(ui.sendCommand, &QPushButton::clicked, [=]
+		{
+			sendCommand(ui.commandEdit->text());
+			ui.commandEdit->clear();
 		});
 
 	connect(ui.updateReport, &QPushButton::clicked, [=]
@@ -198,7 +211,9 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.exportReport, &QPushButton::clicked, [=]
 		{
-			const auto exportFile = QFileDialog::getSaveFileName(this, "导出报告", "", "Excel 文件(*.xls *.xlsx)");
+			const auto exportFile = QFileDialog::getSaveFileName(this, "导出报告"
+				, QString{ "report-%1.xls" }.arg(QDateTime::currentDateTime().toString("yyyyMMdd-hhmmss"))
+				, "Excel 文件(*.xls *.xlsx)");
 			if (exportFile.isEmpty())
 				return;
 			else if (const QFileInfo fileInfo(exportFile); QFile{ fileInfo.path() + "/~$" + fileInfo.fileName() }.exists())
@@ -265,7 +280,8 @@ QuestClient::QuestClient(QWidget* parent)
 				{
 					for (int j = 0; j < columnCount; j++)
 					{
-						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QVariant&)", table->item(i, j)->data(Qt::UserRole));
+						auto var = table->item(i, j)->data(Qt::UserRole);
+						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QVariant&)", var.isNull() ? "" : var);
 					}
 				}
 				// 设置利用率百分比
@@ -394,13 +410,13 @@ QuestClient::QuestClient(QWidget* parent)
 			currentReceivedMessage = QString::fromLatin1(questSocket.read());
 
 			if (config["log_to_window"])
-				ui.logBrowser->append(QString("%1 [Simulation] %2")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+				ui.logBrowser->appendPlainText(QString("%1 [Simulation] %2")
+					.arg(QTime::currentTime().toString("hh:mm:ss"))
 					.arg(currentReceivedMessage));
 			if (config["log_to_file"])
 			{
 				logFile.write(QString("%1 [Simulation] %2\n")
-					.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+					.arg(QTime::currentTime().toString("hh:mm:ss"))
 					.arg(currentReceivedMessage).toLatin1());
 				logFile.flush();
 			}
@@ -417,13 +433,13 @@ void QuestClient::sendCommand(QString command) const
 	questSocket.write(command.toLatin1());
 
 	if (config["log_to_window"])
-		ui.logBrowser->append(QString("%1 [Client] %2")
-			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+		ui.logBrowser->appendPlainText(QString("%1 [Client] %2")
+			.arg(QTime::currentTime().toString("hh:mm:ss"))
 			.arg(command));
 	if (config["log_to_file"])
 	{
 		logFile.write(QString("%1 [Client] %2\n")
-			.arg(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss"))
+			.arg(QTime::currentTime().toString("hh:mm:ss"))
 			.arg(command).toLatin1());
 		logFile.flush();
 	}
