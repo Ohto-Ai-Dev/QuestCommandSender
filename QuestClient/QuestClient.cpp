@@ -146,19 +146,33 @@ QuestClient::QuestClient(QWidget* parent)
 			for (int i = 1; i < 4; ++i)
 			{
 				ui.agvReportTable->item(0, i - 1)->setText(QString::number(touliao[i][0]));
+				ui.agvReportTable->item(0, i - 1)->setData(Qt::UserRole, touliao[i][0]);
 				ui.agvReportTable->item(1, i - 1)->setText(QString::number(touliao[i][1]));
+				ui.agvReportTable->item(1, i - 1)->setData(Qt::UserRole, touliao[i][1]);
 				ui.agvReportTable->item(2, i - 1)->setText(QString::number(touliao[i][2]));
+				ui.agvReportTable->item(2, i - 1)->setData(Qt::UserRole, touliao[i][2]);
 				ui.agvReportTable->item(3, i - 1)->setText(QString::number(touliao[i][0] * 9));
+				ui.agvReportTable->item(3, i - 1)->setData(Qt::UserRole, touliao[i][0] * 9);
 				ui.agvReportTable->item(4, i - 1)->setText(QString::number(touliao[i][1] * 9));
+				ui.agvReportTable->item(4, i - 1)->setData(Qt::UserRole, touliao[i][1] * 9);
 				ui.agvReportTable->item(5, i - 1)->setText(QString::number(touliao[i][2] * 9));
-				ui.agvReportTable->item(6, i - 1)->setText(QString::number(agvUserPercentFixed[i]));
+				ui.agvReportTable->item(5, i - 1)->setData(Qt::UserRole, touliao[i][2] * 9);
+				ui.agvReportTable->item(6, i - 1)->setText(QString::asprintf("%.3f%%", agvUserPercentFixed[i] * 100));
+				ui.agvReportTable->item(6, i - 1)->setData(Qt::UserRole, agvUserPercentFixed[i]);
 				ui.agvReportTable->item(7, i - 1)->setText(QString::number(agvUserPercentFixed[i] * 24));
+				ui.agvReportTable->item(7, i - 1)->setData(Qt::UserRole, agvUserPercentFixed[i] * 24);
 				ui.agvReportTable->item(8, i - 1)->setText(QString::number(gy_xieliao[i]));
+				ui.agvReportTable->item(8, i - 1)->setData(Qt::UserRole, gy_xieliao[i]);
 				ui.agvReportTable->item(9, i - 1)->setText(QString::number(gy_xieliao[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5)));
+				ui.agvReportTable->item(9, i - 1)->setData(Qt::UserRole, gy_xieliao[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5));
 				ui.agvReportTable->item(10, i - 1)->setText(QString::number(sh_xieliao[i]));
+				ui.agvReportTable->item(10, i - 1)->setData(Qt::UserRole, sh_xieliao[i]);
 				ui.agvReportTable->item(11, i - 1)->setText(QString::number(sh_xieliao[i] * 8));
+				ui.agvReportTable->item(11, i - 1)->setData(Qt::UserRole, sh_xieliao[i] * 8);
 				ui.agvReportTable->item(12, i - 1)->setText(QString::number(dgy_xieliao[i]));
+				ui.agvReportTable->item(12, i - 1)->setData(Qt::UserRole, dgy_xieliao[i]);
 				ui.agvReportTable->item(13, i - 1)->setText(QString::number(dgy_xieliao_sum[i]));
+				ui.agvReportTable->item(13, i - 1)->setData(Qt::UserRole, dgy_xieliao_sum[i]);
 			}
 		});
 
@@ -231,9 +245,12 @@ QuestClient::QuestClient(QWidget* parent)
 				{
 					for (int j = 0; j < columnCount; j++)
 					{
-						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QString&)", table->item(i, j) ? table->item(i, j)->text() : "");
+						worksheet->querySubObject("Cells(int,int)", i + 3, j + 2)->dynamicCall("SetValue(const QVariant&)", table->item(i, j)->data(Qt::UserRole));
 					}
 				}
+				// 设置利用率百分比
+				worksheet->querySubObject("Range(const QString&)", "9:9")
+					->setProperty("NumberFormatLocal", "0.000%");
 				// 画框线
 				range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A2:%c%d", columnCount + 'A', rowCount + 2));
 				range->querySubObject("Borders")->setProperty("LineStyle", QString::number(1));
