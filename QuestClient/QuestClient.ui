@@ -496,6 +496,9 @@
        </item>
        <item row="2" column="3">
         <widget class="QLineEdit" name="dgyTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -544,6 +547,9 @@
        </item>
        <item row="3" column="3">
         <widget class="QLineEdit" name="liaocangTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -571,6 +577,9 @@
        </item>
        <item row="4" column="3">
         <widget class="QLineEdit" name="touluTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
          <property name="readOnly">
           <bool>true</bool>
          </property>
@@ -674,7 +683,7 @@
            <item>
             <widget class="QLineEdit" name="agvSpeed1">
              <property name="text">
-              <string>600</string>
+              <string>700</string>
              </property>
             </widget>
            </item>
@@ -724,7 +733,7 @@
            <item>
             <widget class="QLineEdit" name="agvSpeed2">
              <property name="text">
-              <string>600</string>
+              <string>700</string>
              </property>
             </widget>
            </item>
@@ -774,7 +783,7 @@
            <item>
             <widget class="QLineEdit" name="agvSpeed3">
              <property name="text">
-              <string>600</string>
+              <string>700</string>
              </property>
             </widget>
            </item>
@@ -824,7 +833,7 @@
            <item>
             <widget class="QLineEdit" name="agvSpeed4">
              <property name="text">
-              <string>600</string>
+              <string>700</string>
              </property>
             </widget>
            </item>

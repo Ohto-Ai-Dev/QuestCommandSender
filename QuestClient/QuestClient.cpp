@@ -174,7 +174,7 @@ QuestClient::QuestClient(QWidget* parent)
 			}
 
 
-			if (!excel.setControl("excel.Application")) //连接Excel控件
+			if (!excel.setControl("Excel.Application")) //连接Excel控件
 			{
 				QMessageBox::warning(this, "错误", "未能创建 Excel 对象，请安装 Microsoft Excel。", QMessageBox::Apply);
 				return;
