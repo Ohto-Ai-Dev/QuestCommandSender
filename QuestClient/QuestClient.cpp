@@ -12,7 +12,12 @@ QuestClient::QuestClient(QWidget* parent)
 
 	if (QFile configFile{ configPath }; !configFile.exists())
 	{
-		configFile.open(QFile::WriteOnly);
+		if(!configFile.open(QFile::WriteOnly))
+		{
+			QMessageBox::critical(this, "错误", "无法创建配置文件!");
+			QApplication::quit();
+			return;
+		}
 		configFile.write(R"({
   "application_name": "QuestClient.exe",
   "version": "v1.0",
@@ -41,7 +46,12 @@ QuestClient::QuestClient(QWidget* parent)
 		configFile.close();
 	}
 	QFile configFile{ configPath };
-	configFile.open(QFile::ReadOnly);
+	if(!configFile.open(QFile::ReadOnly))
+	{
+		QMessageBox::critical(this, "错误", "无法读取配置文件!");
+		QApplication::quit();
+		return;
+	}
 	config = nlohmann::json::parse(configFile.readAll().toStdString());
 	configFile.close();
 
@@ -56,6 +66,7 @@ QuestClient::QuestClient(QWidget* parent)
 	if (!QFile(questPath).exists())
 	{
 		QMessageBox::warning(this, "启动失败", "Quest路径无效");
+		QApplication::quit();
 		return;
 	}
 
