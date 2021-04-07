@@ -10,15 +10,7 @@ QuestClient::QuestClient(QWidget* parent)
 {
 	ui.setupUi(this);
 
-	if (QFile configFile{ configPath }; !configFile.exists())
-	{
-		if(!configFile.open(QFile::WriteOnly))
-		{
-			QMessageBox::critical(this, "错误", "无法创建配置文件!");
-			QApplication::quit();
-			return;
-		}
-		configFile.write(R"({
+	constexpr auto configData = R"({
   "application_name": "QuestClient.exe",
   "version": "v1.0",
   "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
@@ -38,22 +30,39 @@ QuestClient::QuestClient(QWidget* parent)
     },
     "plan_sim_time": 345600
   },
-  "wait_quest_time":2500,
+  "wait_quest_time":1500,
   "log_to_file": false,
   "log_to_window": true
 }
-)");
+)";
+
+#ifdef USE_CONFIG_FILE
+	if (QFile configFile{ configPath }; !configFile.exists())
+	{
+		if(!configFile.open(QFile::WriteOnly))
+		{
+			QMessageBox::critical(this, "错误", "无法创建配置文件!");
+			QApplication::quit();
+			return;
+		}
+		configFile.write(configData);
 		configFile.close();
-	}
-	QFile configFile{ configPath };
-	if(!configFile.open(QFile::ReadOnly))
+	}	
+	if(QFile configFile{ configPath }; !configFile.open(QFile::ReadOnly))
 	{
 		QMessageBox::critical(this, "错误", "无法读取配置文件!");
 		QApplication::quit();
 		return;
 	}
-	config = nlohmann::json::parse(configFile.readAll().toStdString());
-	configFile.close();
+	else
+	{
+		config = nlohmann::json::parse(configFile.readAll().toStdString());
+		configFile.close();
+	}
+#else
+	config = nlohmann::json::parse(configData);
+#endif
+
 
 	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
 	questPort = config["quest_port"].get<int>();
@@ -84,7 +93,8 @@ QuestClient::QuestClient(QWidget* parent)
 					.toLatin1());
 				logFile.flush();
 			}
-		}, Qt::QueuedConnection);
+			QMessageBox::information(this, "", "仿真程序已连接.");
+		});
 	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
 		{
 			if (config["log_to_window"])
@@ -100,7 +110,7 @@ QuestClient::QuestClient(QWidget* parent)
 				logFile.flush();
 			}
 			QMessageBox::warning(this, "错误", QString{ "Error Occurred.(%1)" }.arg(code));
-		}, Qt::QueuedConnection);
+		});
 
 	connect(ui.resetButton, &QPushButton::clicked, [=]
 		{
