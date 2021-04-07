@@ -93,7 +93,6 @@ QuestClient::QuestClient(QWidget* parent)
 					.toLatin1());
 				logFile.flush();
 			}
-			QMessageBox::information(this, "", "仿真程序已连接.");
 		});
 	connect(&questSocket, &DenebTcpSocket::connectFailed, this, [=](int code)
 		{
@@ -136,7 +135,7 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.updateReport, &QPushButton::clicked, [=]
 		{
-			int gy_xieliao[4]{ 0,0,0,0 }, sh_xieliao[4]{ 0,0,0,0 }, dgy_xieliao[4]{ 0,0,0,0 }, dgy_xieliao_sum[4]{ 0,0,0,0 }, touliao[4][3]{};
+			double gy_xieliao[4]{ 0,0,0,0 }, sh_xieliao[4]{ 0,0,0,0 }, dgy_xieliao[4]{ 0,0,0,0 }, dgy_xieliao_sum[4]{ 0,0,0,0 }, touliao[4][3]{};
 			double agvUserPercentFixed[4]{};
 			auto liaoCangTotal = sendInquireUserAttributeCommand("Source_time", "liaocangtotal", true).toDouble();
 

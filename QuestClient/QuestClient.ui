@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QuestClient</string>
+   <string>Simulate Controller</string>
   </property>
   <property name="windowIcon">
    <iconset resource="QuestClient.qrc">
