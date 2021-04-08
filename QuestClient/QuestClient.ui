@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>907</width>
+    <width>887</width>
     <height>652</height>
    </rect>
   </property>
@@ -18,19 +18,11 @@
     <normaloff>:/QuestClient/res/simulate.png</normaloff>:/QuestClient/res/simulate.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">#logBrowser
-{
-	font: 8pt &quot;Arial&quot;;
-    color:white;
-    background-color: black;
-    border:2px solid rgb(35,35,35);
-    border-radius:3px;
-}
-#resetTip
+   <string notr="true">#resetTip, #updateTip
 {
 	font: 10pt &quot;等线&quot;;
     color:red;
-    border:2px solid rgb(35,35,35);
+    /*border:2px solid rgb(35,35,35);*/
 }
 </string>
   </property>
@@ -188,9 +180,6 @@
             <iconset resource="QuestClient.qrc">
              <normaloff>:/QuestClient/res/play.png</normaloff>:/QuestClient/res/play.png</iconset>
            </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
           </widget>
          </item>
          <item>
@@ -207,9 +196,6 @@
            <property name="icon">
             <iconset resource="QuestClient.qrc">
              <normaloff>:/QuestClient/res/reset.png</normaloff>:/QuestClient/res/reset.png</iconset>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -796,61 +782,100 @@
         </layout>
        </item>
        <item>
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="0" column="0" colspan="3">
-          <widget class="QPlainTextEdit" name="logBrowser">
-           <property name="minimumSize">
-            <size>
-             <width>401</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="verticalScrollBarPolicy">
-            <enum>Qt::ScrollBarAlwaysOff</enum>
-           </property>
-           <property name="readOnly">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QPushButton" name="debugButton">
-           <property name="text">
-            <string>手动调试</string>
-           </property>
-           <property name="icon">
-            <iconset resource="QuestClient.qrc">
-             <normaloff>:/QuestClient/res/debug.png</normaloff>:/QuestClient/res/debug.png</iconset>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="commandEdit"/>
-         </item>
-         <item row="1" column="2">
-          <widget class="QPushButton" name="sendCommand">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="icon">
-            <iconset resource="QuestClient.qrc">
-             <normaloff>:/QuestClient/res/send.png</normaloff>:/QuestClient/res/send.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>18</width>
-             <height>18</height>
-            </size>
-           </property>
-           <property name="flat">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget" native="true">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>71</height>
+          </size>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_3">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item row="2" column="2">
+           <widget class="QPushButton" name="sendCommand">
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="QuestClient.qrc">
+              <normaloff>:/QuestClient/res/send.png</normaloff>:/QuestClient/res/send.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLineEdit" name="commandEdit"/>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="debugButton">
+            <property name="text">
+             <string>手动调试</string>
+            </property>
+            <property name="icon">
+             <iconset resource="QuestClient.qrc">
+              <normaloff>:/QuestClient/res/debug.png</normaloff>:/QuestClient/res/debug.png</iconset>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="QPlainTextEdit" name="logBrowser">
+            <property name="minimumSize">
+             <size>
+              <width>401</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>37</height>
+             </size>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -870,6 +895,33 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
+       <item row="3" column="6">
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="2" column="0" colspan="4">
+        <widget class="QLabel" name="label_24">
+         <property name="text">
+          <string>全天工业垃圾搬运至生活垃圾仓量</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5">
+        <widget class="QLabel" name="label_34">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="updateReport">
          <property name="text">
@@ -892,7 +944,74 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="2" colspan="4">
+       <item row="2" column="5">
+        <widget class="QLabel" name="label_35">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QLineEdit" name="liaocangTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_32">
+         <property name="text">
+          <string>全天料口投料量</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="6">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="4">
+        <widget class="QLineEdit" name="touluTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="6">
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QLabel" name="label_31">
+         <property name="text">
+          <string>生活垃圾仓最大库存</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3" colspan="4">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -905,7 +1024,24 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0" colspan="6">
+       <item row="2" column="4">
+        <widget class="QLineEdit" name="dgyTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <widget class="QLabel" name="label_33">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0" colspan="7">
         <widget class="QTableWidget" name="agvReportTable">
          <property name="minimumSize">
           <size>
@@ -956,7 +1092,7 @@
          </row>
          <row>
           <property name="text">
-           <string>运行小时数</string>
+           <string>大行车运行时长</string>
           </property>
          </row>
          <row>
@@ -1216,116 +1352,12 @@
          </item>
         </widget>
        </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QLabel" name="label_24">
+       <item row="0" column="2">
+        <widget class="QLabel" name="updateTip">
          <property name="text">
-          <string>全天工业垃圾搬运至生活垃圾仓量</string>
+          <string>请在仿真结束返回消息后更新报表</string>
          </property>
         </widget>
-       </item>
-       <item row="2" column="3">
-        <widget class="QLineEdit" name="dgyTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="4">
-        <widget class="QLabel" name="label_35">
-         <property name="text">
-          <string>t</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="5">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="0" colspan="2">
-        <widget class="QLabel" name="label_31">
-         <property name="text">
-          <string>生活垃圾仓最大库存</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="3">
-        <widget class="QLineEdit" name="liaocangTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="4">
-        <widget class="QLabel" name="label_34">
-         <property name="text">
-          <string>t</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="5">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="label_32">
-         <property name="text">
-          <string>全天料口投料量</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="3">
-        <widget class="QLineEdit" name="touluTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="4">
-        <widget class="QLabel" name="label_33">
-         <property name="text">
-          <string>t</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="5">
-        <spacer name="horizontalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
        </item>
       </layout>
      </widget>

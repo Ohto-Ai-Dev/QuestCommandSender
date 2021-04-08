@@ -63,6 +63,9 @@ QuestClient::QuestClient(QWidget* parent)
 	config = nlohmann::json::parse(configData);
 #endif
 
+	ui.debugButton->hide();
+	ui.commandEdit->hide();
+	ui.sendCommand->hide();
 
 	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
 	questPort = config["quest_port"].get<int>();
@@ -148,6 +151,7 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.updateReport, &QPushButton::clicked, [=]
 		{
+			ui.updateReport->setEnabled(false);
 			double gy_xieliao[4]{ 0,0,0,0 }, sh_xieliao[4]{ 0,0,0,0 }, dgy_xieliao[4]{ 0,0,0,0 }, dgy_xieliao_sum[4]{ 0,0,0,0 }, touliao[4][3]{};
 			double agvUserPercentFixed[4]{};
 			auto liaoCangTotal = sendInquireUserAttributeCommand("Source_time", "liaocangtotal", true).toDouble();
@@ -207,6 +211,8 @@ QuestClient::QuestClient(QWidget* parent)
 				ui.agvReportTable->item(13, i - 1)->setText(QString::number(dgy_xieliao_sum[i]));
 				ui.agvReportTable->item(13, i - 1)->setData(Qt::UserRole, dgy_xieliao_sum[i]);
 			}
+
+			ui.updateReport->setEnabled(true);
 		});
 
 	connect(ui.exportReport, &QPushButton::clicked, [=]
