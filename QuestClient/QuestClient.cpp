@@ -336,25 +336,25 @@ QuestClient::QuestClient(QWidget* parent)
 			}
 		});
 
-	connect(ui.sendAGVSpeed, &QPushButton::clicked, [=]
-		{
-			double addSpeed = 0;
-		if(!ui.solution1Choice->isChecked())
-		{
-			if (ui.useBigGrab->isChecked())
-				addSpeed += 300;
-			else
-				addSpeed += 200;
-		}
-		sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(ui.agvSpeed1->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(ui.agvSpeed2->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(ui.agvSpeed3->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(ui.agvSpeed4->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(ui.agvSpeed1->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(ui.agvSpeed2->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(ui.agvSpeed3->text().toInt() + addSpeed));
-			sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(ui.agvSpeed4->text().toInt() + addSpeed));
-		});
+		connect(ui.sendAGVSpeed, &QPushButton::clicked, [=]
+			{
+				double addSpeed = 0;
+				if (!ui.solution1Choice->isChecked())
+				{
+					if (ui.useBigGrab->isChecked())
+						addSpeed += 300;
+					else
+						addSpeed += 200;
+				}
+				sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(ui.agvSpeed1->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(ui.agvSpeed2->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(ui.agvSpeed3->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(ui.agvSpeed4->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(ui.agvSpeed1->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(ui.agvSpeed2->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(ui.agvSpeed3->text().toInt() + addSpeed));
+				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(ui.agvSpeed4->text().toInt() + addSpeed));
+			});
 
 	connect(ui.sendHoistSpeed, &QPushButton::clicked, [=]
 		{
@@ -467,6 +467,16 @@ QuestClient::QuestClient(QWidget* parent)
 			{
 				planSimTime = config["solution1"]["plan_sim_time"].get<int>();
 				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ1\MODELS\GDWJ.mdl')");
+
+
+				sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(400));
+				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(410));
+				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(400));
+				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(400));
+				sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(400));
+				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(410));
+				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(400));
+				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(400));
 			}
 			else
 			{
@@ -483,6 +493,60 @@ QuestClient::QuestClient(QWidget* parent)
 
 				sendSetUserAttributeCommand("Source_time", "mode3", QString::number(ui.solution3Choice->isChecked()));
 				sendSetUserAttributeCommand("Source_time", "modetag", QString::number(ui.usePeakTime->isChecked()));
+
+				// 方案2 3 小抓斗 950 950 950 950 = 2772 2781
+				if(!ui.useBigGrab->isChecked())
+				{
+					auto speed = 950;
+					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));					
+				}
+				else if(ui.solution2Choice->isChecked()&&!ui.usePeakTime->isChecked())
+				{
+					auto speed = 710;
+					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));					
+				}
+				else if (ui.solution3Choice->isChecked() && !ui.usePeakTime->isChecked())
+				{
+					// ok.
+				}
+				else if (ui.solution3Choice->isChecked() && ui.usePeakTime->isChecked())
+				{
+					auto speed = 1030;
+					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));
+				}
+				else if (ui.solution3Choice->isChecked() && ui.usePeakTime->isChecked())
+				{
+					auto speed = 710;
+					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
+					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));
+				}
 			}
 		});
 
