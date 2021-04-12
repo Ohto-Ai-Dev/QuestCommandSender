@@ -1155,12 +1155,12 @@
          </row>
          <row>
           <property name="text">
-           <string>大行车运行时长</string>
+           <string>大车运行时长</string>
           </property>
          </row>
          <row>
           <property name="text">
-           <string>小行车运行时长</string>
+           <string>小车运行时长</string>
           </property>
          </row>
          <row>
