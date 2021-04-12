@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>887</width>
-    <height>652</height>
+    <height>639</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,7 +30,7 @@
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
      <widget class="QWidget" name="leftWidget" native="true">
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -38,7 +38,7 @@
         <number>0</number>
        </property>
        <property name="rightMargin">
-        <number>0</number>
+        <number>9</number>
        </property>
        <property name="bottomMargin">
         <number>0</number>
@@ -782,6 +782,71 @@
         </layout>
        </item>
        <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_19">
+         <item>
+          <widget class="QLabel" name="label_39">
+           <property name="text">
+            <string>行车故障</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="craneFailure">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <item>
+            <property name="text">
+             <string>0</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>2</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>3</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>4</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="sendCraneFailure">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>应用</string>
+           </property>
+           <property name="icon">
+            <iconset resource="QuestClient.qrc">
+             <normaloff>:/QuestClient/res/upload.png</normaloff>:/QuestClient/res/upload.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item>
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -799,10 +864,13 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>71</height>
+           <height>200</height>
           </size>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <property name="leftMargin">
            <number>0</number>
           </property>
@@ -812,58 +880,12 @@
           <property name="rightMargin">
            <number>0</number>
           </property>
-          <property name="bottomMargin">
-           <number>0</number>
-          </property>
-          <item row="2" column="2">
-           <widget class="QPushButton" name="sendCommand">
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="QuestClient.qrc">
-              <normaloff>:/QuestClient/res/send.png</normaloff>:/QuestClient/res/send.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QLineEdit" name="commandEdit"/>
-          </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="debugButton">
-            <property name="text">
-             <string>手动调试</string>
-            </property>
-            <property name="icon">
-             <iconset resource="QuestClient.qrc">
-              <normaloff>:/QuestClient/res/debug.png</normaloff>:/QuestClient/res/debug.png</iconset>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="3">
+          <item>
            <widget class="QPlainTextEdit" name="logBrowser">
-            <property name="minimumSize">
-             <size>
-              <width>401</width>
-              <height>0</height>
-             </size>
-            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
-              <height>37</height>
+              <height>83</height>
              </size>
             </property>
             <property name="verticalScrollBarPolicy">
@@ -873,6 +895,47 @@
              <bool>true</bool>
             </property>
            </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_17">
+            <item>
+             <widget class="QPushButton" name="debugButton">
+              <property name="text">
+               <string>手动调试</string>
+              </property>
+              <property name="icon">
+               <iconset resource="QuestClient.qrc">
+                <normaloff>:/QuestClient/res/debug.png</normaloff>:/QuestClient/res/debug.png</iconset>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="commandEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sendCommand">
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="QuestClient.qrc">
+                <normaloff>:/QuestClient/res/send.png</normaloff>:/QuestClient/res/send.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>18</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -909,7 +972,7 @@
         </spacer>
        </item>
        <item row="2" column="0" colspan="4">
-        <widget class="QLabel" name="label_24">
+        <widget class="QLabel" name="labelDgyTotal">
          <property name="text">
           <string>全天工业垃圾搬运至生活垃圾仓量</string>
          </property>
@@ -962,7 +1025,7 @@
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_32">
+        <widget class="QLabel" name="labelTouluTotal">
          <property name="text">
           <string>全天料口投料量</string>
          </property>
@@ -1005,7 +1068,7 @@
         </spacer>
        </item>
        <item row="3" column="0" colspan="2">
-        <widget class="QLabel" name="label_31">
+        <widget class="QLabel" name="labelLiaocangTotal">
          <property name="text">
           <string>生活垃圾仓最大库存</string>
          </property>
@@ -1093,6 +1156,16 @@
          <row>
           <property name="text">
            <string>大行车运行时长</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>小行车运行时长</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>抓斗运行时长</string>
           </property>
          </row>
          <row>
@@ -1346,6 +1419,36 @@
           </property>
          </item>
          <item row="13" column="2">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="14" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="14" column="1">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="14" column="2">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="15" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="15" column="1">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="15" column="2">
           <property name="text">
            <string/>
           </property>
