@@ -22,12 +22,18 @@ QuestClient::QuestClient(QWidget* parent)
     "use_big_grab": {
       "plan_sim_time": 345600
     },
+	"use_peak_time": {
+	  "plan_sim_time": 345600
+	},
     "plan_sim_time": 345600
   },
   "solution3": {
     "use_big_grab": {
       "plan_sim_time": 345600
     },
+	"use_peak_time": {
+	  "plan_sim_time": 259200
+	},
     "plan_sim_time": 345600
   },
   "wait_quest_time":1500,
@@ -53,7 +59,7 @@ QuestClient::QuestClient(QWidget* parent)
 		QMessageBox::critical(this, "错误", "无法读取配置文件!");
 		QApplication::quit();
 		return;
-	}
+}
 	else
 	{
 		config = nlohmann::json::parse(configFile.readAll().toStdString());
@@ -63,10 +69,15 @@ QuestClient::QuestClient(QWidget* parent)
 	config = nlohmann::json::parse(configData);
 #endif
 
-#if 1//true //true
+#if true
 	ui.debugButton->hide();
 	ui.commandEdit->hide();
 	ui.sendCommand->hide();
+
+	ui.labelFailure->hide();
+	ui.craneFailure->hide();
+	ui.sendCraneFailure->hide();
+
 #endif
 
 	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
@@ -177,8 +188,9 @@ QuestClient::QuestClient(QWidget* parent)
 
 				crossTravelUseTime[i] = (30000 / 2 / 700.0 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
 					+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 120 + (countGY_XL[i] + countDGY_XL[i]) * 150 + countSH_XL[i] * 60) / 3600.0;
-				hoistUseTime[i] = (33000 / 700.0 * 2 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
-					+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 120 + (countGY_XL[i] + countDGY_XL[i]) * 150 + countSH_XL[i] * 60) / 3600.0;
+				hoistUseTime[i] = 48 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i]) / 3600.0;
+				//hoistUseTime[i] = (30000 / 700.0 * 2 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
+				//	+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 90 + (countGY_XL[i] + countDGY_XL[i]) * 120 + countSH_XL[i] * 60) / 3600.0;
 				craneAgvUseRate[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "u_use_rate", true);
 			}
 
@@ -458,6 +470,15 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.loadModel, &QPushButton::clicked, [=]
 		{
+			int modelChoice = 0;
+			if (ui.solution1Choice->isChecked())
+				modelChoice = 1;
+			else if (ui.solution2Choice->isChecked())
+				modelChoice = 2;
+			else if (ui.solution3Choice->isChecked())
+				modelChoice = 3;
+			unityServer.write(QString::asprintf("model = %d", modelChoice).toLatin1());
+
 			sendCommand("CLEAR ALL");
 			questSocket.waitReceived();
 
@@ -465,21 +486,13 @@ QuestClient::QuestClient(QWidget* parent)
 			{
 				planSimTime = config["solution1"]["plan_sim_time"].get<int>();
 				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ1\MODELS\GDWJ.mdl')");
-
-				sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(400));
-				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(410));
-				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(400));
-				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(400));
-				sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(400));
-				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(410));
-				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(400));
-				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(400));
 			}
 			else
 			{
 				if (ui.useBigGrab->isChecked())
 				{
-					planSimTime = config[ui.solution2Choice->isChecked() ? "solution2" : "solution3"]["use_big_grab"]["plan_sim_time"].get<int>();
+					planSimTime = config[ui.solution2Choice->isChecked() ? "solution2" : "solution3"]
+						[ui.usePeakTime->isChecked() ? "use_peak_time" : "use_big_grab"]["plan_sim_time"].get<int>();;
 					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl')");
 				}
 				else
@@ -504,9 +517,10 @@ QuestClient::QuestClient(QWidget* parent)
 					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));
 				}
+				// 方案2 大抓斗
 				else if (ui.solution2Choice->isChecked() && !ui.usePeakTime->isChecked())
 				{
-					auto speed = 710;
+					auto speed = 570;
 					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
@@ -522,7 +536,7 @@ QuestClient::QuestClient(QWidget* parent)
 				}
 				else if (ui.solution2Choice->isChecked() && ui.usePeakTime->isChecked())
 				{
-					auto speed = 950;
+					auto speed = 940;
 					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
@@ -534,7 +548,7 @@ QuestClient::QuestClient(QWidget* parent)
 				}
 				else if (ui.solution3Choice->isChecked() && ui.usePeakTime->isChecked())
 				{
-					auto speed = 710;
+					auto speed = 700;
 					sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(speed));
@@ -564,9 +578,14 @@ QuestClient::QuestClient(QWidget* parent)
 			}
 		});
 
+	unityServer.connectToHost("localhost", 9730);
+
+	if (!unityServer.waitForConnected(3000))
+		QMessageBox::warning(this, "连接失败", "前端未启动！");
 	QEventLoop eventLoop{ this };
 	QTimer::singleShot(config["wait_quest_time"].get<int>(), &eventLoop, &QEventLoop::quit);
 	eventLoop.exec();
+	
 	questSocket.connectToHost("localhost", questPort);
 }
 

@@ -11,6 +11,7 @@
 #include <QWindow>
 #include <QAxObject>
 #include <json.hpp>
+#include <QTcpSocket>
 #include "DenebTcpSocket.h"
 #include "ui_QuestClient.h"
 
@@ -34,6 +35,7 @@ private:
 	mutable QFile logFile{ "application.log", this };
 	static inline QString questPath = R"(D:\deneb\quest\quest.bat)";
 	static inline int questPort = 9988;
+	QTcpSocket unityServer{ this };
 	QAxObject excel{ this };
 
 	int planSimTime = 86400;

@@ -784,7 +784,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_19">
          <item>
-          <widget class="QLabel" name="label_39">
+          <widget class="QLabel" name="labelFailure">
            <property name="text">
             <string>行车故障</string>
            </property>

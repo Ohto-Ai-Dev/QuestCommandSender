@@ -31,12 +31,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|Win32'" Label="QtSettings">
-    <QtModules>axcontainer;core;gui;widgets</QtModules>
+    <QtModules>axcontainer;core;gui;network;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
     <QtInstall>5.15.2_msvc2019</QtInstall>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'" Label="QtSettings">
-    <QtModules>axcontainer;core;gui;widgets</QtModules>
+    <QtModules>axcontainer;core;gui;network;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
     <QtInstall>5.15.2_msvc2019</QtInstall>
   </PropertyGroup>
