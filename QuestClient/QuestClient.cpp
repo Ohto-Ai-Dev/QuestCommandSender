@@ -167,8 +167,8 @@ QuestClient::QuestClient(QWidget* parent)
 	connect(ui.updateReport, &QPushButton::clicked, [=]
 		{
 			ui.updateReport->setEnabled(false);
-			double countGY_XL[4]{ 0,0,0,0 }, countSH_XL[4]{ 0,0,0,0 }, countDGY_XL[4]{ 0,0,0,0 }, counFeeding[4][3]{};
-			double craneAgvUseRate[4]{}, crossTravelUseTime[4]{}, hoistUseTime[4]{};
+			int countGY_XL[4]{ 0,0,0,0 }, countSH_XL[4]{ 0,0,0,0 }, countDGY_XL[4]{ 0,0,0,0 }, counFeeding[4][3]{}, countHoistUse[4]{ 0,0,0,0 };
+			double craneAgvUseRate[4]{}, crossTravelUseTime[4]{}, hoistUseTime[4]{}, elevatorUseTime[4]{};
 			double weightDGY_XL[4]{ 0,0,0,0 }, weightGY_XL[4], weightSH_XL[4];
 			auto weightLiaoCang = sendInquireUserAttributeCommand("Source_time", "liaocangtotal", true).toDouble();
 
@@ -191,6 +191,9 @@ QuestClient::QuestClient(QWidget* parent)
 				hoistUseTime[i] = 48 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i]) / 3600.0;
 				//hoistUseTime[i] = (30000 / 700.0 * 2 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
 				//	+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 90 + (countGY_XL[i] + countDGY_XL[i]) * 120 + countSH_XL[i] * 60) / 3600.0;
+				countHoistUse[i] = counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i];
+				elevatorUseTime[i] = 53.5 * countHoistUse[i] / 3600.0;
+
 				craneAgvUseRate[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "u_use_rate", true);
 			}
 
@@ -200,6 +203,11 @@ QuestClient::QuestClient(QWidget* parent)
 				(counFeeding[1][0] + counFeeding[1][1] + counFeeding[1][2]
 					+ counFeeding[2][0] + counFeeding[2][1] + counFeeding[2][2]
 					+ counFeeding[3][0] + counFeeding[3][1] + counFeeding[3][2]) * 9
+			));
+			ui.xieliaoTotal->setText(QString::number(
+				weightDGY_XL[0] + weightDGY_XL[1] + weightDGY_XL[2] + weightDGY_XL[3]
+				+ weightGY_XL[0] + weightGY_XL[1] + weightGY_XL[2] + weightGY_XL[3]
+				+ weightSH_XL[0] + weightSH_XL[1] + weightSH_XL[2] + weightSH_XL[3]
 			));
 
 			for (int i = 1; i < 4; ++i)
@@ -224,18 +232,22 @@ QuestClient::QuestClient(QWidget* parent)
 				ui.agvReportTable->item(8, i - 1)->setData(Qt::UserRole, crossTravelUseTime[i]);
 				ui.agvReportTable->item(9, i - 1)->setText(QString::number(hoistUseTime[i], 'f', 2));
 				ui.agvReportTable->item(9, i - 1)->setData(Qt::UserRole, hoistUseTime[i]);
-				ui.agvReportTable->item(10, i - 1)->setText(QString::number(countGY_XL[i]));
-				ui.agvReportTable->item(10, i - 1)->setData(Qt::UserRole, countGY_XL[i]);
-				ui.agvReportTable->item(11, i - 1)->setText(QString::number(weightGY_XL[i]));
-				ui.agvReportTable->item(11, i - 1)->setData(Qt::UserRole, weightGY_XL[i]);
-				ui.agvReportTable->item(12, i - 1)->setText(QString::number(countSH_XL[i]));
-				ui.agvReportTable->item(12, i - 1)->setData(Qt::UserRole, countSH_XL[i]);
-				ui.agvReportTable->item(13, i - 1)->setText(QString::number(weightSH_XL[i]));
-				ui.agvReportTable->item(13, i - 1)->setData(Qt::UserRole, weightSH_XL[i]);
-				ui.agvReportTable->item(14, i - 1)->setText(QString::number(countDGY_XL[i]));
-				ui.agvReportTable->item(14, i - 1)->setData(Qt::UserRole, countDGY_XL[i]);
-				ui.agvReportTable->item(15, i - 1)->setText(QString::number(weightDGY_XL[i]));
-				ui.agvReportTable->item(15, i - 1)->setData(Qt::UserRole, weightDGY_XL[i]);
+				ui.agvReportTable->item(10, i - 1)->setText(QString::number(elevatorUseTime[i], 'f', 2));
+				ui.agvReportTable->item(10, i - 1)->setData(Qt::UserRole, elevatorUseTime[i]);				
+				ui.agvReportTable->item(11, i - 1)->setText(QString::number(countGY_XL[i]));
+				ui.agvReportTable->item(11, i - 1)->setData(Qt::UserRole, countGY_XL[i]);
+				ui.agvReportTable->item(12, i - 1)->setText(QString::number(weightGY_XL[i]));
+				ui.agvReportTable->item(12, i - 1)->setData(Qt::UserRole, weightGY_XL[i]);
+				ui.agvReportTable->item(13, i - 1)->setText(QString::number(countSH_XL[i]));
+				ui.agvReportTable->item(13, i - 1)->setData(Qt::UserRole, countSH_XL[i]);
+				ui.agvReportTable->item(14, i - 1)->setText(QString::number(weightSH_XL[i]));
+				ui.agvReportTable->item(14, i - 1)->setData(Qt::UserRole, weightSH_XL[i]);
+				ui.agvReportTable->item(15, i - 1)->setText(QString::number(countDGY_XL[i]));
+				ui.agvReportTable->item(15, i - 1)->setData(Qt::UserRole, countDGY_XL[i]);
+				ui.agvReportTable->item(16, i - 1)->setText(QString::number(weightDGY_XL[i]));
+				ui.agvReportTable->item(16, i - 1)->setData(Qt::UserRole, weightDGY_XL[i]);
+				ui.agvReportTable->item(17, i - 1)->setText(QString::number(countHoistUse[i]));
+				ui.agvReportTable->item(17, i - 1)->setData(Qt::UserRole, countHoistUse[i]);
 			}
 
 			ui.updateReport->setEnabled(true);
@@ -333,6 +345,12 @@ QuestClient::QuestClient(QWidget* parent)
 					->dynamicCall("SetValue(const QString&)", ui.labelTouluTotal->text());
 				worksheet->querySubObject("Cells(int,int)", table->rowCount() + 5, 2)
 					->dynamicCall("SetValue(const QString&)", ui.touluTotal->text());
+
+				worksheet->querySubObject("Cells(int,int)", table->rowCount() + 6, 1)
+					->dynamicCall("SetValue(const QString&)", ui.labelXieliaoTotal->text());
+				worksheet->querySubObject("Cells(int,int)", table->rowCount() + 6, 2)
+					->dynamicCall("SetValue(const QString&)", ui.xieliaoTotal->text());
+				
 				// 画框线
 				range = worksheet->querySubObject("Range(const QString&)", QString::asprintf("A2:%c%d", columnCount + 'A', rowCount + 2));
 				range->querySubObject("Borders")->setProperty("LineStyle", QString::number(1));
@@ -378,6 +396,7 @@ QuestClient::QuestClient(QWidget* parent)
 	connect(ui.sendCraneFailure, &QPushButton::clicked, [=]
 		{
 			sendSetUserAttributeCommand("Source_time", "crane_failure", ui.craneFailure->currentText());
+			unityServer.write(QString("crane_failure = %1").arg(ui.craneFailure->currentText()).toLatin1());
 		});
 
 	connect(ui.sendTime, &QPushButton::clicked, [=]
@@ -486,6 +505,19 @@ QuestClient::QuestClient(QWidget* parent)
 			{
 				planSimTime = config["solution1"]["plan_sim_time"].get<int>();
 				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ1\MODELS\GDWJ.mdl')");
+
+				sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(700));
+				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(600));
+				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(300));
+				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(600));
+				sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(700));
+				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(600));
+				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(300));
+				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(600));
+				sendSetCommand("gd_Hoist1", "SPEED", "700");
+				sendSetCommand("gd_Hoist2", "SPEED", "700");
+				sendSetCommand("gd_Hoist3", "SPEED", "700");
+				sendSetCommand("gd_Hoist4", "SPEED", "700");
 			}
 			else
 			{

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>887</width>
-    <height>639</height>
+    <height>747</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,7 +224,7 @@
        <item>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="0">
-          <widget class="QWidget" name="widget" native="true">
+          <widget class="QWidget" name="speedWidget" native="true">
            <property name="minimumSize">
             <size>
              <width>131</width>
@@ -324,7 +324,7 @@
               <item>
                <widget class="QLabel" name="label_4">
                 <property name="text">
-                 <string>#3垃圾吊</string>
+                 <string>#4垃圾吊</string>
                 </property>
                </widget>
               </item>
@@ -362,7 +362,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QWidget" name="widget" native="true">
+          <widget class="QWidget" name="updownWidget" native="true">
            <property name="minimumSize">
             <size>
              <width>111</width>
@@ -860,7 +860,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QWidget" name="widget" native="true">
+        <widget class="QWidget" name="debugWidget" native="true">
          <property name="maximumSize">
           <size>
            <width>16777215</width>
@@ -945,10 +945,7 @@
     </item>
     <item>
      <widget class="QWidget" name="reportWidget" native="true">
-      <layout class="QGridLayout" name="gridLayout_4">
-       <property name="leftMargin">
-        <number>9</number>
-       </property>
+      <layout class="QGridLayout" name="gridLayout_3">
        <property name="topMargin">
         <number>0</number>
        </property>
@@ -958,33 +955,6 @@
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item row="3" column="6">
-        <spacer name="horizontalSpacer_4">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="0" colspan="4">
-        <widget class="QLabel" name="labelDgyTotal">
-         <property name="text">
-          <string>全天工业垃圾搬运至生活垃圾仓量</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="5">
-        <widget class="QLabel" name="label_34">
-         <property name="text">
-          <string>t</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QPushButton" name="updateReport">
          <property name="text">
@@ -1007,74 +977,14 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="5">
-        <widget class="QLabel" name="label_35">
+       <item row="0" column="2">
+        <widget class="QLabel" name="updateTip">
          <property name="text">
-          <string>t</string>
+          <string>请在仿真结束返回消息后更新报表</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="4">
-        <widget class="QLineEdit" name="liaocangTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QLabel" name="labelTouluTotal">
-         <property name="text">
-          <string>全天料口投料量</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="6">
-        <spacer name="horizontalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="4" column="4">
-        <widget class="QLineEdit" name="touluTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="6">
-        <spacer name="horizontalSpacer_5">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>136</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="3" column="0" colspan="2">
-        <widget class="QLabel" name="labelLiaocangTotal">
-         <property name="text">
-          <string>生活垃圾仓最大库存</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3" colspan="4">
+       <item row="0" column="3" colspan="3">
         <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -1087,24 +997,7 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="4">
-        <widget class="QLineEdit" name="dgyTotal">
-         <property name="text">
-          <string>0</string>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="5">
-        <widget class="QLabel" name="label_33">
-         <property name="text">
-          <string>t</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="7">
+       <item row="1" column="0" colspan="6">
         <widget class="QTableWidget" name="agvReportTable">
          <property name="minimumSize">
           <size>
@@ -1170,6 +1063,11 @@
          </row>
          <row>
           <property name="text">
+           <string>升降运行时长</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
            <string>生活仓工业垃圾卸料次数</string>
           </property>
          </row>
@@ -1196,6 +1094,11 @@
          <row>
           <property name="text">
            <string>工业仓工业垃圾卸料量</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>抓斗总开闭次数</string>
           </property>
          </row>
          <column>
@@ -1453,14 +1356,185 @@
            <string/>
           </property>
          </item>
+         <item row="16" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="16" column="1">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="16" column="2">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="17" column="0">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="17" column="1">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
+         <item row="17" column="2">
+          <property name="text">
+           <string/>
+          </property>
+         </item>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="updateTip">
+       <item row="2" column="0" colspan="3">
+        <widget class="QLabel" name="labelDgyTotal">
          <property name="text">
-          <string>请在仿真结束返回消息后更新报表</string>
+          <string>全天工业垃圾搬运至生活垃圾仓量</string>
          </property>
         </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLineEdit" name="dgyTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <widget class="QLabel" name="label_35">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="5">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="0" colspan="2">
+        <widget class="QLabel" name="labelLiaocangTotal">
+         <property name="text">
+          <string>生活垃圾仓最大库存</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLineEdit" name="liaocangTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QLabel" name="label_34">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="5">
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="labelTouluTotal">
+         <property name="text">
+          <string>全天料口投料量</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="3">
+        <widget class="QLineEdit" name="touluTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4">
+        <widget class="QLabel" name="label_33">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="5">
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>136</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="labelXieliaoTotal">
+         <property name="text">
+          <string>全天卸料量</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="3">
+        <widget class="QLineEdit" name="xieliaoTotal">
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="4">
+        <widget class="QLabel" name="label_31">
+         <property name="text">
+          <string>t</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="5">
+        <spacer name="horizontalSpacer_8">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>47</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
