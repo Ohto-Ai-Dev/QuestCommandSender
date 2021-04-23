@@ -1,8 +1,5 @@
 ﻿#pragma execution_character_set("utf-8")
 #include "QuestClient.h"
-#include <windows.h>
-#include <thread>
-#include <QThread>
 
 QuestClient::QuestClient(QWidget* parent)
 	: QMainWindow(parent)
@@ -69,16 +66,12 @@ QuestClient::QuestClient(QWidget* parent)
 	config = nlohmann::json::parse(configData);
 #endif
 
-#if true
-	ui.debugButton->hide();
-	ui.commandEdit->hide();
-	ui.sendCommand->hide();
-
-	ui.labelFailure->hide();
-	ui.craneFailure->hide();
-	ui.sendCraneFailure->hide();
-
-#endif
+	if (!QFile{ ".debug" }.exists())
+	{
+		ui.debugButton->hide();
+		ui.commandEdit->hide();
+		ui.sendCommand->hide();
+	}
 
 	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
 	questPort = config["quest_port"].get<int>();
@@ -98,7 +91,7 @@ QuestClient::QuestClient(QWidget* parent)
 	}
 
 	QProcess::execute(questPath, { "-s", QString::number(questPort) });
-
+		
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
 			if (config["log_to_window"])
@@ -189,8 +182,7 @@ QuestClient::QuestClient(QWidget* parent)
 				crossTravelUseTime[i] = (30000 / 2 / 700.0 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
 					+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 120 + (countGY_XL[i] + countDGY_XL[i]) * 150 + countSH_XL[i] * 60) / 3600.0;
 				hoistUseTime[i] = 48 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i]) / 3600.0;
-				//hoistUseTime[i] = (30000 / 700.0 * 2 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
-				//	+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 90 + (countGY_XL[i] + countDGY_XL[i]) * 120 + countSH_XL[i] * 60) / 3600.0;
+
 				countHoistUse[i] = counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i];
 				elevatorUseTime[i] = 53.5 * countHoistUse[i] / 3600.0;
 
@@ -393,12 +385,43 @@ QuestClient::QuestClient(QWidget* parent)
 			sendSetCommand("gd_Hoist4", "SPEED", ui.hoistSpeed4->text());
 		});
 
-	connect(ui.sendCraneFailure, &QPushButton::clicked, [=]
+	connect(ui.sendOtherScene, &QPushButton::clicked, [=]
 		{
-			sendSetUserAttributeCommand("Source_time", "crane_failure", ui.craneFailure->currentText());
-			unityServer.write(QString("crane_failure = %1").arg(ui.craneFailure->currentText()).toLatin1());
+			bool crane2Failure = ui.solutionCrane2Failure->isChecked()
+				|| ui.solutionLuzi1Failure->isChecked()
+				|| ui.solutionLuzi2Failure->isChecked();
+			sendSetUserAttributeCommand("Source_time", "crane_failure", crane2Failure ? "2" : "0");
+			unityServer.write(QString("crane_failure = %1").arg(crane2Failure ? 2 : 0).toLatin1());
+
+			sendSetCommand("Buffer_temp_LK3_2", "DELAY TIME FOR ANY PART CLASS", QString::number(ui.solutionLuzi1Failure->isChecked() ? 345600 : 0));
+			sendSetCommand("Buffer_temp_LK3_1", "DELAY TIME FOR ANY PART CLASS", QString::number(ui.solutionLuzi2Failure->isChecked() ? 345600 : 0));
+			unityServer.write(QString("luzi_failure = %1").arg(ui.solutionLuzi1Failure->isChecked() ? 1 : ui.solutionLuzi2Failure->isChecked() ? 2 : 0).toLatin1());
+					
 		});
 
+	connect(ui.restoreNormalScene, &QPushButton::clicked, [=]
+		{
+			ui.solutionCrane2Failure->setAutoExclusive(false);
+			ui.solutionLuzi1Failure->setAutoExclusive(false);
+			ui.solutionLuzi2Failure->setAutoExclusive(false);
+			ui.solutionGYCMove->setAutoExclusive(false);
+			ui.solutionCrane2Failure->setChecked(false);
+			ui.solutionLuzi1Failure->setChecked(false);
+			ui.solutionLuzi2Failure->setChecked(false);
+			ui.solutionGYCMove->setChecked(false);
+			ui.solutionCrane2Failure->setAutoExclusive(true);
+			ui.solutionLuzi1Failure->setAutoExclusive(true);
+			ui.solutionLuzi2Failure->setAutoExclusive(true);
+			ui.solutionGYCMove->setAutoExclusive(true);
+
+			sendSetUserAttributeCommand("Source_time", "crane_failure", "0");
+			unityServer.write(QString("crane_failure = 0").toLatin1());
+			sendSetCommand("Buffer_temp_LK3_2", "DELAY TIME FOR ANY PART CLASS", "0");
+			sendSetCommand("Buffer_temp_LK3_1", "DELAY TIME FOR ANY PART CLASS", "0");
+			unityServer.write(QString("luzi_failure = 0").toLatin1());
+
+		});
+	
 	connect(ui.sendTime, &QPushButton::clicked, [=]
 		{
 			sendSetCommand("Buffer_LK3_2_upload", "LOAD TIME", ui.loadTime->text());
@@ -433,8 +456,7 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(false);
 			ui.useBigGrab->setChecked(false);
 			ui.usePeakTime->setChecked(false);
-			ui.craneFailure->setEnabled(false);
-			ui.sendCraneFailure->setEnabled(false);
+			ui.otherScenePannel->setEnabled(false);
 		});
 	connect(ui.solution2Choice, &QRadioButton::clicked, [=]
 		{
@@ -442,11 +464,7 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
 			if (!ui.usePeakTime->isEnabled())
 				ui.usePeakTime->setChecked(false);
-			if (ui.useBigGrab->isChecked() && !ui.usePeakTime->isChecked())
-			{
-				ui.craneFailure->setEnabled(true);
-				ui.sendCraneFailure->setEnabled(true);
-			}
+			ui.otherScenePannel->setEnabled(!ui.useBigGrab->isChecked());
 		});
 	connect(ui.solution3Choice, &QRadioButton::clicked, [=]
 		{
@@ -454,37 +472,18 @@ QuestClient::QuestClient(QWidget* parent)
 			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
 			if (!ui.usePeakTime->isEnabled())
 				ui.usePeakTime->setChecked(false);
-			ui.craneFailure->setEnabled(false);
-			ui.sendCraneFailure->setEnabled(false);
+			ui.otherScenePannel->setEnabled(false);
 		});
 	connect(ui.useBigGrab, &QCheckBox::clicked, [=]
 		{
 			ui.usePeakTime->setEnabled(ui.useBigGrab->isChecked());
 			if (!ui.useBigGrab->isChecked())
 				ui.usePeakTime->setChecked(false);
-			if (ui.solution2Choice->isChecked() && ui.useBigGrab->isChecked())
-			{
-				ui.craneFailure->setEnabled(true);
-				ui.sendCraneFailure->setEnabled(true);
-			}
-			else
-			{
-				ui.craneFailure->setEnabled(false);
-				ui.sendCraneFailure->setEnabled(false);
-			}
+			ui.otherScenePannel->setEnabled(ui.solution2Choice->isChecked() && !ui.useBigGrab->isChecked());
 		});
 	connect(ui.usePeakTime, &QPushButton::clicked, [=]
 		{
-			if (ui.solution2Choice->isChecked() && ui.useBigGrab->isChecked() && !ui.usePeakTime->isChecked())
-			{
-				ui.craneFailure->setEnabled(true);
-				ui.sendCraneFailure->setEnabled(true);
-			}
-			else
-			{
-				ui.craneFailure->setEnabled(false);
-				ui.sendCraneFailure->setEnabled(false);
-			}
+			ui.otherScenePannel->setEnabled(ui.solution2Choice->isChecked() && !ui.useBigGrab->isChecked());
 		});
 
 	connect(ui.loadModel, &QPushButton::clicked, [=]
@@ -498,6 +497,7 @@ QuestClient::QuestClient(QWidget* parent)
 				modelChoice = 3;
 			unityServer.write(QString::asprintf("model = %d", modelChoice).toLatin1());
 
+					
 			sendCommand("CLEAR ALL");
 			questSocket.waitReceived();
 
