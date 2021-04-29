@@ -434,14 +434,14 @@ QuestClient::QuestClient(QWidget* parent)
 			if (ui.solutionCrane2Failure->isChecked()
 				|| ui.solutionLuzi1Failure->isChecked())
 				craneFailure = 2;
-			else if (ui.solutionLuzi3Failure->isChecked())
+			else if (ui.solutionLuzi2Failure->isChecked())
 				craneFailure = 4;
 
 			
 			if (ui.solutionLuzi1Failure->isChecked())
 				luziFailure = 1;
-			else if (ui.solutionLuzi3Failure->isChecked())
-				luziFailure = 3;
+			else if (ui.solutionLuzi2Failure->isChecked())
+				luziFailure = 2;
 
 			sendSetUserAttributeCommand("Source_time", "crane_failure", QString::number(craneFailure));
 			unityServer.write(QString("crane_failure = %1").arg(craneFailure).toLatin1());
@@ -454,6 +454,7 @@ QuestClient::QuestClient(QWidget* parent)
 			};
 
 			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", luziFailure != 1);
+			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_1", luziFailure != 2);
 			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", luziFailure != 3);
 		
 			sendSetUserAttributeCommand("Source_time", "luzi_failure", QString::number(luziFailure));
@@ -727,15 +728,15 @@ void QuestClient::restoreNormalScene()
 		luziFailure = 0;
 		ui.solutionCrane2Failure->setAutoExclusive(false);
 		ui.solutionLuzi1Failure->setAutoExclusive(false);
-		ui.solutionLuzi3Failure->setAutoExclusive(false);
+		ui.solutionLuzi2Failure->setAutoExclusive(false);
 		ui.solutionGYCMove->setAutoExclusive(false);
 		ui.solutionCrane2Failure->setChecked(false);
 		ui.solutionLuzi1Failure->setChecked(false);
-		ui.solutionLuzi3Failure->setChecked(false);
+		ui.solutionLuzi2Failure->setChecked(false);
 		ui.solutionGYCMove->setChecked(false);
 		ui.solutionCrane2Failure->setAutoExclusive(true);
 		ui.solutionLuzi1Failure->setAutoExclusive(true);
-		ui.solutionLuzi3Failure->setAutoExclusive(true);
+		ui.solutionLuzi2Failure->setAutoExclusive(true);
 		ui.solutionGYCMove->setAutoExclusive(true);
 
 		auto reconnectElement = [=](QString fromClass, QString toClass, bool isConnect)
@@ -744,6 +745,7 @@ void QuestClient::restoreNormalScene()
 			if (isConnect)
 				sendCommand(QString{ "CONNECT ELEMENT '%1_1' TO ELEMENT '%2_1'" }.arg(fromClass, toClass));
 		};
+		reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_1", true);
 		reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", true);
 		reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", true);
 
