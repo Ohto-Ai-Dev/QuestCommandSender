@@ -29,6 +29,7 @@ public:
 	QString sendInquireUserAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 
+	void restoreNormalScene();
 private:
 	static inline const char* configPath{ "application.json" };
 	nlohmann::json config;

@@ -471,39 +471,7 @@ QuestClient::QuestClient(QWidget* parent)
 		
 		});
 
-	connect(ui.restoreNormalScene, &QPushButton::clicked, [=]
-		{
-			craneFailure = 0;
-			luziFailure = 0;
-			ui.solutionCrane2Failure->setAutoExclusive(false);
-			ui.solutionLuzi1Failure->setAutoExclusive(false);
-			ui.solutionLuzi3Failure->setAutoExclusive(false);
-			ui.solutionGYCMove->setAutoExclusive(false);
-			ui.solutionCrane2Failure->setChecked(false);
-			ui.solutionLuzi1Failure->setChecked(false);
-			ui.solutionLuzi3Failure->setChecked(false);
-			ui.solutionGYCMove->setChecked(false);
-			ui.solutionCrane2Failure->setAutoExclusive(true);
-			ui.solutionLuzi1Failure->setAutoExclusive(true);
-			ui.solutionLuzi3Failure->setAutoExclusive(true);
-			ui.solutionGYCMove->setAutoExclusive(true);
-
-			auto reconnectElement = [=](QString fromClass, QString toClass, bool isConnect)
-			{
-				sendCommand(QString{ "DISCONNECT ELEMENT '%1_1' ALL INPUT" }.arg(toClass));
-				if (isConnect)
-					sendCommand(QString{ "CONNECT ELEMENT '%1_1' TO ELEMENT '%2_1'" }.arg(fromClass, toClass));
-			};		
-			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", true);
-			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", true);
-		
-			sendSetUserAttributeCommand("Source_time", "crane_failure", "0");
-			sendSetUserAttributeCommand("Source_time", "luzi_failure", "0");
-		
-			unityServer.write(QString("crane_failure = 0").toLatin1());
-			unityServer.write(QString("luzi_failure = 0").toLatin1());
-
-		});
+	connect(ui.restoreNormalScene, &QPushButton::clicked, this, &QuestClient::restoreNormalScene);
 	
 	connect(ui.sendTime, &QPushButton::clicked, [=]
 		{
@@ -580,7 +548,7 @@ QuestClient::QuestClient(QWidget* parent)
 				modelChoice = 3;
 			unityServer.write(QString::asprintf("model = %d", modelChoice).toLatin1());
 
-					
+				
 			sendCommand("CLEAR ALL");
 			questSocket.waitReceived();
 
@@ -673,6 +641,7 @@ QuestClient::QuestClient(QWidget* parent)
 					sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(speed));
 					sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(speed));
 				}
+				restoreNormalScene();
 			}
 		});
 
@@ -748,4 +717,40 @@ QString QuestClient::sendInquireUserAttributeCommand(QString name, QString attri
 double QuestClient::sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance) const
 {
 	return sendInquireUserAttributeCommand(name, attribute, isInstance).toDouble();
+}
+
+void QuestClient::restoreNormalScene()
+{
+	if (craneFailure != 0 || luziFailure != 0)
+	{
+		craneFailure = 0;
+		luziFailure = 0;
+		ui.solutionCrane2Failure->setAutoExclusive(false);
+		ui.solutionLuzi1Failure->setAutoExclusive(false);
+		ui.solutionLuzi3Failure->setAutoExclusive(false);
+		ui.solutionGYCMove->setAutoExclusive(false);
+		ui.solutionCrane2Failure->setChecked(false);
+		ui.solutionLuzi1Failure->setChecked(false);
+		ui.solutionLuzi3Failure->setChecked(false);
+		ui.solutionGYCMove->setChecked(false);
+		ui.solutionCrane2Failure->setAutoExclusive(true);
+		ui.solutionLuzi1Failure->setAutoExclusive(true);
+		ui.solutionLuzi3Failure->setAutoExclusive(true);
+		ui.solutionGYCMove->setAutoExclusive(true);
+
+		auto reconnectElement = [=](QString fromClass, QString toClass, bool isConnect)
+		{
+			sendCommand(QString{ "DISCONNECT ELEMENT '%1_1' ALL INPUT" }.arg(toClass));
+			if (isConnect)
+				sendCommand(QString{ "CONNECT ELEMENT '%1_1' TO ELEMENT '%2_1'" }.arg(fromClass, toClass));
+		};
+		reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", true);
+		reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", true);
+
+		sendSetUserAttributeCommand("Source_time", "crane_failure", "0");
+		sendSetUserAttributeCommand("Source_time", "luzi_failure", "0");
+
+		unityServer.write(QString("crane_failure = 0").toLatin1());
+		unityServer.write(QString("luzi_failure = 0").toLatin1());
+	}
 }
