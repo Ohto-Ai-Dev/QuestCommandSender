@@ -66,12 +66,19 @@ QuestClient::QuestClient(QWidget* parent)
 	config = nlohmann::json::parse(configData);
 #endif
 
-	if (!QFile{ ".debug" }.exists())
-	{
-		ui.debugButton->hide();
-		ui.commandEdit->hide();
-		ui.sendCommand->hide();
-	}
+	connect(&debugCheckTimer, &QTimer::timeout, [=]
+		{
+			if (QFile{ ".debug" }.exists())
+			{
+				ui.debugPannel->show();
+			}
+			else
+			{
+				ui.debugPannel->hide();
+			}
+		});
+	debugCheckTimer.setInterval(1000);
+	debugCheckTimer.start();
 
 	questPath = QString::fromStdString(config["quest_bat_path"].get<std::string>());
 	questPort = config["quest_port"].get<int>();
@@ -171,13 +178,47 @@ QuestClient::QuestClient(QWidget* parent)
 				countGY_XL[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "gy_xieliao", true);
 				countSH_XL[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "sh_xieliao", true);
 				countDGY_XL[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "dgy_xieliao", true);
-				weightDGY_XL[i] = countDGY_XL[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
-				weightGY_XL[i] = countGY_XL[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
-				weightSH_XL[i] = countSH_XL[i] * 8;
 
 				counFeeding[i][0] = sendInquireUserNumericAttributeCommand(craneAgvName, "touliao1", true);
 				counFeeding[i][1] = sendInquireUserNumericAttributeCommand(craneAgvName, "touliao2", true);
 				counFeeding[i][2] = sendInquireUserNumericAttributeCommand(craneAgvName, "touliao3", true);
+
+				craneAgvUseRate[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "u_use_rate", true);
+
+			}
+
+			// #2 #4 送到#3
+			if (craneFailure == 2 || craneFailure == 4)
+			{
+				countGY_XL[2] += countGY_XL[craneFailure - 1];
+				countSH_XL[2] += countSH_XL[craneFailure - 1];
+				countDGY_XL[2] += countDGY_XL[craneFailure - 1];
+				counFeeding[2][0] += counFeeding[craneFailure - 1][0];
+				counFeeding[2][1] += counFeeding[craneFailure - 1][1];
+				counFeeding[2][2] += counFeeding[craneFailure - 1][2];
+				craneAgvUseRate[2] += craneAgvUseRate[craneFailure - 1];
+
+				countGY_XL[craneFailure - 1] = 0;
+				countSH_XL[craneFailure - 1] = 0;
+				countDGY_XL[craneFailure - 1] = 0;
+				counFeeding[craneFailure - 1][0] = 0;
+				counFeeding[craneFailure - 1][1] = 0;
+				counFeeding[craneFailure - 1][2] = 0;
+				craneAgvUseRate[craneFailure - 1] = 0;
+
+			}
+			// #2 
+			if (craneFailure == 2 && luziFailure == 0)
+			{
+				counFeeding[3][1] += counFeeding[2][1]; // #3车#2炉数据放到#4车
+				counFeeding[2][1] = 0;
+			}
+
+			for (int i = 1; i < 4; ++i)
+			{				
+				weightDGY_XL[i] = countDGY_XL[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
+				weightGY_XL[i] = countGY_XL[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
+				weightSH_XL[i] = countSH_XL[i] * 8;
 
 				crossTravelUseTime[i] = (30000 / 2 / 700.0 * (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i])
 					+ (counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2]) * 120 + (countGY_XL[i] + countDGY_XL[i]) * 150 + countSH_XL[i] * 60) / 3600.0;
@@ -186,9 +227,9 @@ QuestClient::QuestClient(QWidget* parent)
 				countHoistUse[i] = counFeeding[i][0] + counFeeding[i][1] + counFeeding[i][2] + countGY_XL[i] + countSH_XL[i] + countDGY_XL[i];
 				elevatorUseTime[i] = 53.5 * countHoistUse[i] / 3600.0;
 
-				craneAgvUseRate[i] = sendInquireUserNumericAttributeCommand(craneAgvName, "u_use_rate", true);
 			}
 
+		
 			ui.dgyTotal->setText(QString::number(weightDGY_XL[1] + weightDGY_XL[2] + weightDGY_XL[3]));
 			ui.liaocangTotal->setText(QString::number(weightLiaoCang));
 			ui.touluTotal->setText(QString::number(
@@ -201,6 +242,7 @@ QuestClient::QuestClient(QWidget* parent)
 				+ weightGY_XL[0] + weightGY_XL[1] + weightGY_XL[2] + weightGY_XL[3]
 				+ weightSH_XL[0] + weightSH_XL[1] + weightSH_XL[2] + weightSH_XL[3]
 			));
+
 
 			for (int i = 1; i < 4; ++i)
 			{
@@ -387,37 +429,78 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.sendOtherScene, &QPushButton::clicked, [=]
 		{
-			bool crane2Failure = ui.solutionCrane2Failure->isChecked()
-				|| ui.solutionLuzi1Failure->isChecked()
-				|| ui.solutionLuzi2Failure->isChecked();
-			sendSetUserAttributeCommand("Source_time", "crane_failure", crane2Failure ? "2" : "0");
-			unityServer.write(QString("crane_failure = %1").arg(crane2Failure ? 2 : 0).toLatin1());
+			craneFailure = 0;
+			luziFailure = 0;
+			if (ui.solutionCrane2Failure->isChecked()
+				|| ui.solutionLuzi1Failure->isChecked())
+				craneFailure = 2;
+			else if (ui.solutionLuzi3Failure->isChecked())
+				craneFailure = 4;
 
-			sendSetCommand("Buffer_temp_LK3_2", "DELAY TIME FOR ANY PART CLASS", QString::number(ui.solutionLuzi1Failure->isChecked() ? 345600 : 0));
-			sendSetCommand("Buffer_temp_LK3_1", "DELAY TIME FOR ANY PART CLASS", QString::number(ui.solutionLuzi2Failure->isChecked() ? 345600 : 0));
-			unityServer.write(QString("luzi_failure = %1").arg(ui.solutionLuzi1Failure->isChecked() ? 1 : ui.solutionLuzi2Failure->isChecked() ? 2 : 0).toLatin1());
-					
+			
+			if (ui.solutionLuzi1Failure->isChecked())
+				luziFailure = 1;
+			else if (ui.solutionLuzi3Failure->isChecked())
+				luziFailure = 3;
+
+			sendSetUserAttributeCommand("Source_time", "crane_failure", QString::number(craneFailure));
+			unityServer.write(QString("crane_failure = %1").arg(craneFailure).toLatin1());
+
+			auto reconnectElement = [=](QString fromClass, QString toClass, bool isConnect)
+			{
+				sendCommand(QString{ "DISCONNECT ELEMENT '%1_1' ALL INPUT" }.arg(toClass));
+				if (isConnect)
+					sendCommand(QString{ "CONNECT ELEMENT '%1_1' TO ELEMENT '%2_1'" }.arg(fromClass, toClass));
+			};
+
+			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", luziFailure != 1);
+			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", luziFailure != 3);
+		
+			sendSetUserAttributeCommand("Source_time", "luzi_failure", QString::number(luziFailure));
+			unityServer.write(QString("luzi_failure = %1").arg(luziFailure).toLatin1());
+
+			if (craneFailure == 2 && luziFailure == 0)
+			{
+				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(1000));
+				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(1000));
+				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(1000));
+				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(1000));
+			}
+		
 		});
 
 	connect(ui.restoreNormalScene, &QPushButton::clicked, [=]
 		{
+			craneFailure = 0;
+			luziFailure = 0;
 			ui.solutionCrane2Failure->setAutoExclusive(false);
 			ui.solutionLuzi1Failure->setAutoExclusive(false);
-			ui.solutionLuzi2Failure->setAutoExclusive(false);
+			ui.solutionLuzi3Failure->setAutoExclusive(false);
 			ui.solutionGYCMove->setAutoExclusive(false);
 			ui.solutionCrane2Failure->setChecked(false);
 			ui.solutionLuzi1Failure->setChecked(false);
-			ui.solutionLuzi2Failure->setChecked(false);
+			ui.solutionLuzi3Failure->setChecked(false);
 			ui.solutionGYCMove->setChecked(false);
 			ui.solutionCrane2Failure->setAutoExclusive(true);
 			ui.solutionLuzi1Failure->setAutoExclusive(true);
-			ui.solutionLuzi2Failure->setAutoExclusive(true);
+			ui.solutionLuzi3Failure->setAutoExclusive(true);
 			ui.solutionGYCMove->setAutoExclusive(true);
 
+			auto reconnectElement = [=](QString fromClass, QString toClass, bool isConnect)
+			{
+				sendCommand(QString{ "DISCONNECT ELEMENT '%1_1' ALL INPUT" }.arg(toClass));
+				if (isConnect)
+					sendCommand(QString{ "CONNECT ELEMENT '%1_1' TO ELEMENT '%2_1'" }.arg(fromClass, toClass));
+			};		
+			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", true);
+			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", true);
+		
 			sendSetUserAttributeCommand("Source_time", "crane_failure", "0");
+			sendSetUserAttributeCommand("Source_time", "luzi_failure", "0");
+		
 			unityServer.write(QString("crane_failure = 0").toLatin1());
-			sendSetCommand("Buffer_temp_LK3_2", "DELAY TIME FOR ANY PART CLASS", "0");
-			sendSetCommand("Buffer_temp_LK3_1", "DELAY TIME FOR ANY PART CLASS", "0");
 			unityServer.write(QString("luzi_failure = 0").toLatin1());
 
 		});
@@ -524,7 +607,7 @@ QuestClient::QuestClient(QWidget* parent)
 				if (ui.useBigGrab->isChecked())
 				{
 					planSimTime = config[ui.solution2Choice->isChecked() ? "solution2" : "solution3"]
-						[ui.usePeakTime->isChecked() ? "use_peak_time" : "use_big_grab"]["plan_sim_time"].get<int>();;
+						[ui.usePeakTime->isChecked() ? "use_peak_time" : "use_big_grab"]["plan_sim_time"].get<int>();
 					sendCommand(R"(READ MODEL 'D:\deneb\GDWJ2-3crane2\MODELS\GDWJ.mdl')");
 				}
 				else

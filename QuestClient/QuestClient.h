@@ -38,7 +38,11 @@ private:
 	QTcpSocket unityServer{ this };
 	QAxObject excel{ this };
 
+	int craneFailure{ 0 };
+	int luziFailure{ 0 };
 	int planSimTime = 86400;
+
+	QTimer debugCheckTimer{ this };
 
 	QString currentReceivedMessage{};
 	Ui::QuestClientClass ui;
