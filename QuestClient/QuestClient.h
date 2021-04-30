@@ -30,6 +30,8 @@ public:
 	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
 
 	void restoreNormalScene();
+
+	void sendDefaultAgvSpeed() const;
 private:
 	static inline const char* configPath{ "application.json" };
 	nlohmann::json config;
