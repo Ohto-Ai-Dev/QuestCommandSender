@@ -442,7 +442,6 @@ QuestClient::QuestClient(QWidget* parent)
 			else if (ui.solutionLuzi2Failure->isChecked())
 				craneFailure = 4;
 
-			
 			if (ui.solutionLuzi1Failure->isChecked())
 				luziFailure = 1;
 			else if (ui.solutionLuzi2Failure->isChecked())
@@ -461,11 +460,22 @@ QuestClient::QuestClient(QWidget* parent)
 			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_2", luziFailure != 1);
 			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_1", luziFailure != 2);
 			reconnectElement("Buffer_LK3_2", "Buffer_temp_LK3_3", luziFailure != 3);
-		
+
 			sendSetUserAttributeCommand("Source_time", "luzi_failure", QString::number(luziFailure));
 			unityServer.write(QString("luzi_failure = %1").arg(luziFailure).toLatin1());
 
-			if (craneFailure == 2)
+			if (luziFailure == 1)
+			{
+				sendSetCommand("gd_Crane_AGV1", "SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV3", "SPEED", QString::number(500));
+				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(640));
+				sendSetCommand("gd_Crane_AGV1", "LOADED SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(900));
+				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(500));
+				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(640));
+			}
+			else if (craneFailure == 2)
 			{
 				sendSetCommand("gd_Crane_AGV2", "SPEED", QString::number(900));
 				sendSetCommand("gd_Crane_AGV2", "LOADED SPEED", QString::number(900));
@@ -473,7 +483,7 @@ QuestClient::QuestClient(QWidget* parent)
 				sendSetCommand("gd_Crane_AGV4", "SPEED", QString::number(1000));
 				sendSetCommand("gd_Crane_AGV3", "LOADED SPEED", QString::number(1000));
 				sendSetCommand("gd_Crane_AGV4", "LOADED SPEED", QString::number(1000));
-			}		
+			}
 		});
 
 	connect(ui.restoreNormalScene, &QPushButton::clicked, this, &QuestClient::restoreNormalScene);
