@@ -217,6 +217,13 @@ QuestClient::QuestClient(QWidget* parent)
 				countGY_XL[2] = 0;
 			}
 
+			// 搬运方案
+			if(ui.solutionGYCMove->isChecked())
+			{
+				countSH_XL[2] = countSH_XL[3] / 2;
+				countSH_XL[3] -= countSH_XL[2];
+			}
+			
 			for (int i = 1; i < 4; ++i)
 			{				
 				weightDGY_XL[i] = countDGY_XL[i] * (ui.useBigGrab->isChecked() ? 6 : 3.5);
