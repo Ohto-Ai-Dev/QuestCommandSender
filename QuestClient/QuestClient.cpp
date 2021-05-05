@@ -432,10 +432,19 @@ QuestClient::QuestClient(QWidget* parent)
 
 	connect(ui.sendOtherScene, &QPushButton::clicked, [=]
 		{
-			sendDefaultAgvSpeed();
-		
 			craneFailure = 0;
 			luziFailure = 0;
+		
+			if(ui.solutionGYCMove->isChecked())
+			{
+				sendCommand("CLEAR ALL");
+				questSocket.waitReceived();
+				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ-JDQK\MODELS\GDWJ.mdl')");
+				return;
+			}
+		
+			sendDefaultAgvSpeed();
+
 			if (ui.solutionCrane2Failure->isChecked()
 				|| ui.solutionLuzi1Failure->isChecked())
 				craneFailure = 2;
