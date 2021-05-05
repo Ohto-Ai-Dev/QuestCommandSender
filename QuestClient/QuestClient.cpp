@@ -447,6 +447,7 @@ QuestClient::QuestClient(QWidget* parent)
 				sendCommand("CLEAR ALL");
 				questSocket.waitReceived();
 				sendCommand(R"(READ MODEL 'D:\deneb\GDWJ-JDQK\MODELS\GDWJ.mdl')");
+				unityServer.write("tsqk = 1");
 				return;
 			}
 		
