@@ -50,6 +50,8 @@ private:
 
 	QProcess extraPorcess{ this };
 	QTimer debugCheckTimer{ this };
+	QWindow* extraWindow{ nullptr };
+	QWidget* extraWindowContainer{ nullptr };
 
 	QString currentReceivedMessage{};
 	Ui::QuestClientClass ui;

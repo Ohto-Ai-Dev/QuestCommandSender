@@ -90,7 +90,9 @@ QuestClient::QuestClient(QWidget* parent)
 			if (WId winId = getFirstWindowOfProcess(extraPorcess);
 				winId != NULL)
 			{
-				ui.animGridLayout->addWidget(createWindowContainer(QWindow::fromWinId(winId), this, Qt::Widget));
+				extraWindowContainer = createWindowContainer(extraWindow = QWindow::fromWinId(winId), this, Qt::ForeignWindow);
+				extraWindowContainer->setFocusPolicy(Qt::TabFocus);
+				ui.animGridLayout->addWidget(extraWindowContainer);
 			}
 			else
 			{
@@ -328,6 +330,8 @@ void QuestClient::configInstall()
 
 void QuestClient::signalsInstall()
 {
+	connect(&extraPorcess, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), qApp, &QApplication::quit);
+	
 	connect(&questSocket, &DenebTcpSocket::connected, this, [=]
 		{
 			if (config["log_to_window"])
