@@ -24,7 +24,9 @@
     color:red;
     /*border:2px solid rgb(35,35,35);*/
 }
-</string>
+#animDockWidget&gt; QWidget{
+	border-right: 1px solid black;
+}</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
