@@ -32,6 +32,9 @@ public:
 	void restoreNormalScene();
 
 	void sendDefaultAgvSpeed() const;
+
+	void configInstall();
+	void signalsInstall();
 private:
 	static inline const char* configPath{ "application.json" };
 	nlohmann::json config;
@@ -45,6 +48,7 @@ private:
 	int luziFailure{ 0 };
 	int planSimTime = 86400;
 
+	QProcess extraPorcess{ this };
 	QTimer debugCheckTimer{ this };
 
 	QString currentReceivedMessage{};

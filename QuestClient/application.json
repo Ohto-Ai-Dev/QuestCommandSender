@@ -1,5 +1,5 @@
 {
-  "application_name": "QuestClient.exe",
+  "title": "模拟演练控制端",
   "version": "v1.0",
   "quest_bat_path":"D:\\deneb\\quest\\quest.bat",
   "quest_port":9988,
@@ -8,17 +8,30 @@
   },
   "solution2": {
     "use_big_grab": {
-      "plan_sim_time": 172800
+      "plan_sim_time": 345600
     },
-    "run_time": 345600
+	"use_peak_time": {
+	  "plan_sim_time": 345600
+	},
+    "plan_sim_time": 345600
   },
   "solution3": {
     "use_big_grab": {
-      "plan_sim_time": 172800
+      "plan_sim_time": 345600
     },
+	"use_peak_time": {
+	  "plan_sim_time": 259200
+	},
     "plan_sim_time": 345600
   },
-  "wait_quest_time":2500,
+  "lunch_quest_time":1500,
   "log_to_file": false,
-  "log_to_window": true
+  "log_to_window": true,
+  "extra_process_path":"notepad",
+  "lunch_extra_process_time":5000,
+  "extra_process_port":9730,
+  "connect_extra_process_time":3000,
+  "connect_extra_process_timeout":3000,
+  "connect_extra_process_failure_info":"前端动画连接失败",
+  "catch_extra_process_window_failure_info":"捕获动画窗口失败"
 }
