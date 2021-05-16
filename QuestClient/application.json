@@ -27,11 +27,8 @@
   "lunch_quest_time":1500,
   "log_to_file": false,
   "log_to_window": true,
-  "extra_process_path":"notepad",
-  "lunch_extra_process_time":5000,
   "extra_process_port":9730,
   "connect_extra_process_time":3000,
   "connect_extra_process_timeout":3000,
-  "connect_extra_process_failure_info":"前端动画连接失败",
-  "catch_extra_process_window_failure_info":"捕获动画窗口失败"
+  "connect_extra_process_failure_info":"前端动画连接失败"
 }

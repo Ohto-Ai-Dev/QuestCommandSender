@@ -22,12 +22,12 @@ class QuestClient : public QMainWindow
 public:
 	QuestClient(QWidget* parent = Q_NULLPTR);
 
-	void sendCommand(QString) const;
+	void sendCommand(QString, std::function<void(QByteArray)> onReceived = std::function<void(QByteArray)>()) const;
 	void sendSetCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
-	QString sendInquireCommand(QString name, QString attribute, bool isInstance = false)const;
 	void sendSetUserAttributeCommand(QString name, QString attribute, QString value, bool isInstance = false)const;
-	QString sendInquireUserAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
-	double sendInquireUserNumericAttributeCommand(QString name, QString attribute, bool isInstance = false)const;
+	void sendInquireUserNumericAttributeCommand(QString name, QString attribute, std::function<void(double)> onReceived)const;
+	void sendInquireUserNumericAttributeCommand(QString name, QString attribute, double&val)const;
+	void sendInquireUserNumericAttributeCommand(QString name, QString attribute, int&val)const;
 
 	void restoreNormalScene();
 
@@ -35,6 +35,9 @@ public:
 
 	void configInstall();
 	void signalsInstall();
+
+	void callUpdateReport();
+	void doExportReport();
 private:
 	static inline const char* configPath{ "application.json" };
 	nlohmann::json config;
@@ -48,12 +51,18 @@ private:
 	int luziFailure{ 0 };
 	int planSimTime = 86400;
 
-	QProcess extraPorcess{ this };
+	// report data
+	int countGY_XL[4]{ 0,0,0,0 }, countSH_XL[4]{ 0,0,0,0 }, countDGY_XL[4]{ 0,0,0,0 }, counFeeding[4][3]{}, countHoistUse[4]{ 0,0,0,0 };
+	double craneAgvUseRate[4]{}, craneAgvUseTime[4]{}, hoistUseTime[4]{}, elevatorUseTime[4]{};
+	double weightDGY_XL[4]{ 0,0,0,0 }, weightGY_XL[4], weightSH_XL[4];
+	double weightLiaoCang{};
+
+	//QProcess extraPorcess{ this };
 	QTimer debugCheckTimer{ this };
+	QTimer recvDataTimer{ this };
 	QWindow* extraWindow{ nullptr };
 	QWidget* extraWindowContainer{ nullptr };
 
-	QString currentReceivedMessage{};
 	Ui::QuestClientClass ui;
 	using Socket = int;
 	DenebTcpSocket questSocket;

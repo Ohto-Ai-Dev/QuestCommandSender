@@ -28,10 +28,20 @@ DenebTcpSocket::DenebTcpSocket(QObject* parent)
 			const auto code = net_test_socket(m_socket);
 			if (code < 0)
 				disconnectToHost();
-			else if (code > 0 && !hasMessage)
+			else if (code > 0)
 			{
-				hasMessage = true;
-				emit received();
+				char buff[4096] = { 0 };
+				net_readsocket(m_socket, buff);
+				QByteArray recvData{ buff };
+				auto task = messageQueue.dequeue();
+				if (task.onReceived)
+					task.onReceived(recvData);
+				emit received(task.data, recvData);
+			}
+			if(!messageQueue.isEmpty()&&!messageQueue.head().isOnProcess)
+			{
+				messageQueue.head().isOnProcess = true;
+				net_writesocket(m_socket, messageQueue.head().data);
 			}
 		}, Qt::QueuedConnection);
 }
@@ -76,27 +86,9 @@ bool DenebTcpSocket::test() const
 	return net_test_socket(m_socket) > 0;
 }
 
-bool DenebTcpSocket::write(QByteArray data) const
+void DenebTcpSocket::write(QByteArray data, std::function<void(QByteArray)> onReceived) const
 {
-	return net_writesocket(m_socket, data) == 0;
-}
-
-QByteArray DenebTcpSocket::read() const
-{
-	char buff[4096] = { 0 };
-	net_readsocket(m_socket, buff);
-	hasMessage = false;
-	return buff;
-}
-
-bool DenebTcpSocket::waitReceived(int msec) const
-{
-	bool received = true;
-	auto eventLoop = new QEventLoop(const_cast<DenebTcpSocket*>(this));
-	QTimer::singleShot(msec, [eventLoop, &received] {received = false; eventLoop->quit(); });
-	connect(this, &DenebTcpSocket::received, eventLoop, &QEventLoop::quit);
-	eventLoop->exec();
-	return received;
+	messageQueue.enqueue({ data,onReceived });
 }
 
 QString DenebTcpSocket::hostname() const
