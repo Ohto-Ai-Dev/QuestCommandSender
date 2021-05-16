@@ -749,6 +749,10 @@ void QuestClient::signalsInstall()
 					sendDateTable.append(table->item(i, j)->text());
 				}
 			}
+			sendDateTable.append(ui.dgyTotal->text());
+			sendDateTable.append(ui.liaocangTotal->text());
+			sendDateTable.append(ui.touluTotal->text());
+			sendDateTable.append(ui.xieliaoTotal->text());
 			unityServer.write(("data = " + sendDateTable.join(",")).toLatin1());
 		
 			ui.updateReport->setEnabled(true);
