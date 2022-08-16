@@ -2,7 +2,6 @@
 // Microsoft Visual C++ 生成的包含文件。
 // 供 QuestClient.rc 使用
 //
-#define IDI_ICON1                       102
 #define IDI_MAINICON                    102
 
 // Next default values for new objects

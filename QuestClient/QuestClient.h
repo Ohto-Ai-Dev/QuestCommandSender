@@ -10,7 +10,7 @@
 #include <QDateTime>
 #include <QWindow>
 #include <QAxObject>
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 #include <QTcpSocket>
 #include "DenebTcpSocket.h"
 #include "ui_QuestClient.h"
